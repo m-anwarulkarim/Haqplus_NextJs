@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "db:seed": "bun prisma/seed.ts",
-    "pages:build": "prisma generate && npx @cloudflare/next-on-pages",
+    "pages:build": "prisma generate && NPM_CONFIG_LEGACY_PEER_DEPS=true npx @cloudflare/next-on-pages",
     "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output/static",
     "preview": "npm run pages:build && wrangler pages dev .vercel/output/static"
   },
