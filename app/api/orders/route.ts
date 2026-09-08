@@ -267,8 +267,8 @@ export async function POST(req: Request) {
           where: { fcmToken: { not: null } },
           select: { fcmToken: true },
         })
-        .then((admins) => {
-          const tokens = admins.map((a) => a.fcmToken!).filter(Boolean);
+        .then((admins: { fcmToken: string | null }[]) => {
+          const tokens = admins.map((a: { fcmToken: string | null }) => a.fcmToken!).filter(Boolean);
           if (tokens.length > 0) {
             messaging
               .sendEachForMulticast({

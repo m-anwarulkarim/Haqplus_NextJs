@@ -36,7 +36,7 @@ export async function GET(
       product.reviews.length > 0
         ? Number(
             (
-              product.reviews.reduce((acc, r) => acc + r.rating, 0) /
+              product.reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) /
               product.reviews.length
             ).toFixed(1)
           )
@@ -51,11 +51,11 @@ export async function GET(
       rating: avgRating,
       reviewCount: product.reviews.length,
       inStock: product.stock > 0,
-      variants: product.variants.map((v) => ({
+      variants: product.variants.map((v: Record<string, any>) => ({
         ...v,
         price: Number(v.price),
       })),
-      reviews: product.reviews.map((r) => ({
+      reviews: product.reviews.map((r: Record<string, any>) => ({
         id: r.id,
         productId: r.productId,
         userId: r.userId,
@@ -139,7 +139,7 @@ export async function PUT(
     }
 
     // Transaction to update product and replace variants
-    const updatedProduct = await prisma.$transaction(async (tx) => {
+    const updatedProduct = await prisma.$transaction(async (tx: any) => {
       // Delete existing variants
       await tx.productVariant.deleteMany({
         where: { productId: id },

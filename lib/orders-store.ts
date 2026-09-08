@@ -248,7 +248,7 @@ export async function saveResilientOrder(orderData: {
     fileOrders.unshift({
       ...fallbackOrder,
       id: dbOrder.id,
-      items: dbOrder.items.map((it) => ({
+      items: dbOrder.items.map((it: any) => ({
         id: it.id,
         orderId: dbOrder.id,
         productId: it.productId,
@@ -264,7 +264,7 @@ export async function saveResilientOrder(orderData: {
     return {
       ...fallbackOrder,
       id: dbOrder.id,
-      items: dbOrder.items.map((it) => ({
+      items: dbOrder.items.map((it: any) => ({
         id: it.id,
         orderId: dbOrder.id,
         productId: it.productId,
@@ -329,7 +329,7 @@ export async function getResilientOrder(idOrNumber: string): Promise<StoredOrder
         courierTrackingId: dbOrder.courierTrackingId,
         courierStatus: dbOrder.courierStatus,
         note: dbOrder.note,
-        items: dbOrder.items.map((it) => ({
+        items: dbOrder.items.map((it: any) => ({
           id: it.id,
           orderId: dbOrder.id,
           productId: it.productId,
@@ -350,7 +350,7 @@ export async function getResilientOrder(idOrNumber: string): Promise<StoredOrder
   // File fallback
   const fileOrders = readOrdersFromFile();
   const match = fileOrders.find(
-    (o) =>
+    (o: any) =>
       o.id === idOrNumber ||
       o.orderNumber === idOrNumber ||
       o.courierTrackingId === idOrNumber
@@ -392,7 +392,7 @@ export async function getResilientOrders(filter?: {
       orderBy: { createdAt: "desc" },
     });
 
-    dbOrders = fetched.map((o) => ({
+    dbOrders = fetched.map((o: any) => ({
       id: o.id,
       orderNumber: o.orderNumber,
       userId: o.userId,
@@ -413,7 +413,7 @@ export async function getResilientOrders(filter?: {
       courierTrackingId: o.courierTrackingId,
       courierStatus: o.courierStatus,
       note: o.note,
-      items: o.items.map((it) => ({
+      items: o.items.map((it: any) => ({
         id: it.id,
         orderId: o.id,
         productId: it.productId,
@@ -513,7 +513,7 @@ export async function updateResilientOrder(
         courierTrackingId: dbUpdated.courierTrackingId,
         courierStatus: dbUpdated.courierStatus,
         note: dbUpdated.note,
-        items: dbUpdated.items.map((it) => ({
+        items: dbUpdated.items.map((it: any) => ({
           id: it.id,
           orderId: dbUpdated.id,
           productId: it.productId,

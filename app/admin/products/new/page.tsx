@@ -15,7 +15,7 @@ export default async function AdminNewProductPage() {
       orderBy: { name: "asc" },
     });
 
-    categories = rawCategories.map((c) => ({
+    categories = rawCategories.map((c: { id: string; name: string; slug: string; image: string | null; parentId: string | null }) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,
