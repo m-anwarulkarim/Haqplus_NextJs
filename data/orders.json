@@ -1,0 +1,884 @@
+[
+  {
+    "id": "cmtsvbb6i000dvf8gvm4krkd1",
+    "orderNumber": "ORD-946570-6983",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "poddodanga ,kodaila,mollahat, bagerhat",
+    "subtotal": 280,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 280,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_ty14xk",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "cmtsvbb6i000fvf8gd1q78k8r",
+        "orderId": "cmtsvbb6i000dvf8gvm4krkd1",
+        "productId": "tea-1",
+        "variantId": "tea-1-std",
+        "productName": "হকপ্লাস শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (৪০০ গ্রাম)",
+        "quantity": 1,
+        "price": 280,
+        "product": {
+          "id": "tea-1",
+          "name": "হকপ্লাস শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (৪০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-1-1788883946578"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T16:12:26.571Z",
+    "updatedAt": "2026-09-08T16:12:26.571Z"
+  },
+  {
+    "id": "cmtsu4u3v0009vf8gbg4ihsi2",
+    "orderNumber": "ORD-964903-8985",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "পদ্মডাঙ্গা, কোদালিয়া, মোল্লাহাট,\nবাগেরহাট",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_q7k8op",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "cmtsu4u3v000bvf8gpy6wyhjh",
+        "orderId": "cmtsu4u3v0009vf8gbg4ihsi2",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2-1788877716677"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T15:39:24.903Z",
+    "updatedAt": "2026-09-08T15:39:24.903Z"
+  },
+  {
+    "id": "cmtsu4ftl0005vf8gs7n58e2n",
+    "orderNumber": "ORD-946388-6319",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "poddodanga ,kodaila,mollahat, bagerhat",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_102w94",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "cmtsu4ftl0007vf8g2hge2u8a",
+        "orderId": "cmtsu4ftl0005vf8gs7n58e2n",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2-1788877716677"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T15:39:06.389Z",
+    "updatedAt": "2026-09-08T15:39:06.389Z"
+  },
+  {
+    "id": "cmtstvafb0001vf8gq07z7yv9",
+    "orderNumber": "ORD-519394-1178",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Brahmandanga, Munijila\nChaultury Post Office",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_el3si9",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "cmtstvafb0003vf8gwqmd2ie7",
+        "orderId": "cmtstvafb0001vf8gq07z7yv9",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2-1788877716677"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T15:31:59.488Z",
+    "updatedAt": "2026-09-08T15:31:59.488Z"
+  },
+  {
+    "id": "ord_cuid_1788881094831_mlxv2",
+    "orderNumber": "ORD-094831-4353",
+    "userId": "usr-anwarul-admin",
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Brahmandanga, Munijila\nChaultury Post Office",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_ftesm3",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1788881094831_0",
+        "orderId": "ord_cuid_1788881094831_mlxv2",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T15:24:54.831Z",
+    "updatedAt": "2026-09-08T15:24:54.831Z"
+  },
+  {
+    "id": "ord_cuid_1788880403691_vdx62",
+    "orderNumber": "ORD-403691-4599",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Brahmandanga, Munijila\nChaultury Post Office",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_njkvl6",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1788880403691_0",
+        "orderId": "ord_cuid_1788880403691_vdx62",
+        "productId": "tea-2",
+        "variantId": "tea-2-std",
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T15:13:23.691Z",
+    "updatedAt": "2026-09-08T15:13:23.691Z"
+  },
+  {
+    "id": "ord_cuid_1788877716653_5c5ko",
+    "orderNumber": "ORD-716650-5225",
+    "userId": "usr-anwarul-admin",
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 390,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 390,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_n9kbm5",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1788877716653_0",
+        "orderId": "ord_cuid_1788877716653_5c5ko",
+        "productId": "tea-2",
+        "variantId": "tea-2-std",
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T14:28:36.653Z",
+    "updatedAt": "2026-09-08T14:28:36.653Z"
+  },
+  {
+    "id": "ord_cuid_1788833636899_dtvrp",
+    "orderNumber": "ORD-636857-4608",
+    "userId": null,
+    "customerName": "test",
+    "phone": "01602867954",
+    "email": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "test , tets",
+    "subtotal": 280,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 280,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_rxgetw",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "08/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1788833636899_0",
+        "orderId": "ord_cuid_1788833636899_dtvrp",
+        "productId": "tea-1",
+        "variantId": "tea-1-std",
+        "productName": "হকপ্লাস শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (৪০০ গ্রাম)",
+        "quantity": 1,
+        "price": 280,
+        "product": {
+          "id": "tea-1",
+          "name": "হকপ্লাস শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (৪০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-1"
+        }
+      }
+    ],
+    "createdAt": "2026-09-08T02:13:56.899Z",
+    "updatedAt": "2026-09-08T02:13:56.899Z"
+  },
+  {
+    "id": "ord_cuid_1788801530207_hrywd",
+    "orderNumber": "ORD-530173-5141",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 780,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 780,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "STF-371856",
+    "courierStatus": "in_review",
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_imnrut",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "07/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1788801530208_0",
+        "orderId": "ord_cuid_1788801530207_hrywd",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "HaqPlus Organic First Flush Green Tea (200g)",
+        "quantity": 2,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "HaqPlus Organic First Flush Green Tea (200g)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T17:18:50.207Z",
+    "updatedAt": "2026-09-07T17:27:26.426Z"
+  },
+  {
+    "id": "ord_cuid_1788758614231_oo2od",
+    "orderNumber": "ORD-614231-9243",
+    "userId": "usr-anwarul-admin",
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Brahmandanga, Munijila\nChaultury Post Office",
+    "subtotal": 780,
+    "discount": 0,
+    "shippingCharge": 60,
+    "total": 840,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
+    "courierTrackingId": "STF-579072",
+    "courierStatus": "in_review",
+    "note": null,
+    "items": [
+      {
+        "productId": "tea-2",
+        "name": "HaqPlus Organic First Flush Green Tea (200g)",
+        "price": 390,
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+      },
+      {
+        "productId": "tea-2",
+        "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "price": 390,
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+      }
+    ],
+    "createdAt": "2026-09-07T05:23:34.231Z",
+    "updatedAt": "2026-09-07T17:17:50.431Z",
+    "advance": 0
+  },
+  {
+    "id": "ord_cuid_1788756245666_p225y",
+    "orderNumber": "ORD-245666-8891",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 1120,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 1120,
+    "paymentMethod": "BKASH",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "STF-130425",
+    "courierStatus": "in_review",
+    "note": null,
+    "items": [
+      {
+        "id": "item_1788756245667_0",
+        "orderId": "ord_cuid_1788756245666_p225y",
+        "productId": "tea-3",
+        "variantId": null,
+        "productName": "HaqPlus Royal Masala Chai Blend (250g)",
+        "quantity": 1,
+        "price": 340,
+        "product": {
+          "id": "tea-3",
+          "name": "HaqPlus Royal Masala Chai Blend (250g)",
+          "images": [
+            "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-3"
+        }
+      },
+      {
+        "id": "item_1788756245667_1",
+        "orderId": "ord_cuid_1788756245666_p225y",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "HaqPlus Organic First Flush Green Tea (200g)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "HaqPlus Organic First Flush Green Tea (200g)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      },
+      {
+        "id": "item_1788756245667_2",
+        "orderId": "ord_cuid_1788756245666_p225y",
+        "productId": "tea-2",
+        "variantId": "tea-2-std",
+        "productName": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+        "quantity": 1,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "হকপ্লাস অর্গানিক ফার্স্ট ফ্লাশ গ্রিন টি (২০০ গ্রাম)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T04:44:05.666Z",
+    "updatedAt": "2026-09-07T16:52:14.549Z"
+  },
+  {
+    "id": "ord_cuid_1788752572114_2xbt7",
+    "orderNumber": "ORD-572114-7735",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 1040,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 1040,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "STF-413204",
+    "courierStatus": "in_review",
+    "note": null,
+    "items": [
+      {
+        "id": "item_1788752572115_0",
+        "orderId": "ord_cuid_1788752572114_2xbt7",
+        "productId": "tea-5",
+        "variantId": null,
+        "productName": "HaqPlus Tulsi Ginger Herbal Wellness Tea (100g)",
+        "quantity": 1,
+        "price": 260,
+        "product": {
+          "id": "tea-5",
+          "name": "HaqPlus Tulsi Ginger Herbal Wellness Tea (100g)",
+          "images": [
+            "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-5"
+        }
+      },
+      {
+        "id": "item_1788752572115_1",
+        "orderId": "ord_cuid_1788752572114_2xbt7",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "HaqPlus Organic First Flush Green Tea (200g)",
+        "quantity": 2,
+        "price": 390,
+        "product": {
+          "id": "tea-2",
+          "name": "HaqPlus Organic First Flush Green Tea (200g)",
+          "images": [
+            "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T03:42:52.114Z",
+    "updatedAt": "2026-09-07T16:55:10.183Z",
+    "deviceInfo": {
+      "isBanned": false
+    }
+  },
+  {
+    "id": "ord_cuid_1788752386571_3lmqo",
+    "orderNumber": "ORD-386571-5580",
+    "userId": null,
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 260,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 260,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "items": [
+      {
+        "id": "item_1788752386571_0",
+        "orderId": "ord_cuid_1788752386571_3lmqo",
+        "productId": "tea-verify",
+        "variantId": null,
+        "productName": "HaqPlus Tulsi Ginger Herbal Wellness Tea",
+        "quantity": 1,
+        "price": 260,
+        "product": {
+          "id": "tea-verify",
+          "name": "HaqPlus Tulsi Ginger Herbal Wellness Tea",
+          "images": [
+            "/placeholder.png"
+          ],
+          "slug": "tea-verify"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T03:39:46.571Z",
+    "updatedAt": "2026-09-07T17:31:34.344Z"
+  },
+  {
+    "id": "ord_cuid_1788752316623_f22n8",
+    "orderNumber": "ORD-316623-2175",
+    "userId": null,
+    "customerName": "Test User 2",
+    "phone": "01912345678",
+    "email": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Agrabad, Chittagong",
+    "subtotal": 200,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 200,
+    "paymentMethod": "BKASH",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "items": [
+      {
+        "id": "item_1788752316623_0",
+        "orderId": "ord_cuid_1788752316623_f22n8",
+        "productId": "tea-2",
+        "variantId": null,
+        "productName": "HaqPlus Black Tea",
+        "quantity": 1,
+        "price": 200,
+        "product": {
+          "id": "tea-2",
+          "name": "HaqPlus Black Tea",
+          "images": [
+            "/placeholder.png"
+          ],
+          "slug": "tea-2"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T03:38:36.623Z",
+    "updatedAt": "2026-09-07T03:38:36.623Z"
+  },
+  {
+    "id": "ord_cuid_1788752316486_3prv3",
+    "orderNumber": "ORD-316485-3183",
+    "userId": null,
+    "customerName": "Test User 1",
+    "phone": "01712345678",
+    "email": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "House 1, Road 2, Banani, Dhaka",
+    "subtotal": 300,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 300,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": "Please deliver in afternoon",
+    "items": [
+      {
+        "id": "item_1788752316486_0",
+        "orderId": "ord_cuid_1788752316486_3prv3",
+        "productId": "tea-1",
+        "variantId": null,
+        "productName": "HaqPlus Green Tea",
+        "quantity": 2,
+        "price": 150,
+        "product": {
+          "id": "tea-1",
+          "name": "HaqPlus Green Tea",
+          "images": [
+            "/placeholder.png"
+          ],
+          "slug": "tea-1"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T03:38:36.485Z",
+    "updatedAt": "2026-09-07T03:38:36.485Z"
+  },
+  {
+    "id": "ord_cuid_1788752296023_l1c03",
+    "orderNumber": "ORD-296022-5611",
+    "userId": null,
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 260,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 260,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "items": [
+      {
+        "id": "item_1788752296023_0",
+        "orderId": "ord_cuid_1788752296023_l1c03",
+        "productId": "sample-tea-1",
+        "variantId": null,
+        "productName": "HaqPlus Tulsi Ginger Herbal Wellness Tea",
+        "quantity": 1,
+        "price": 260,
+        "product": {
+          "id": "sample-tea-1",
+          "name": "HaqPlus Tulsi Ginger Herbal Wellness Tea",
+          "images": [
+            "/placeholder.png"
+          ],
+          "slug": "sample-tea-1"
+        }
+      }
+    ],
+    "createdAt": "2026-09-07T03:38:16.023Z",
+    "updatedAt": "2026-09-07T03:38:16.023Z"
+  },
+  {
+    "id": "ord_cuid_1788693702618_vgnqr",
+    "orderNumber": "ORD-702618-6315",
+    "userId": null,
+    "customerName": "Anwarul Karim",
+    "phone": "01712345678",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "House 12, Road 4, Sector 7, Uttara, Dhaka",
+    "subtotal": 349.99,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 349.99,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "STF-523761",
+    "courierStatus": "in_review",
+    "note": "Please call before delivery",
+    "items": [
+      {
+        "id": "item_1788693702618_0",
+        "orderId": "ord_cuid_1788693702618_vgnqr",
+        "productId": "prod-1",
+        "variantId": null,
+        "productName": "Sony WH-1000XM5 Wireless Headphones",
+        "quantity": 1,
+        "price": 349.99,
+        "product": {
+          "id": "prod-1",
+          "name": "Sony WH-1000XM5 Wireless Headphones",
+          "images": [
+            "https://images.unsplash.com/photo-1505740420928-5e560c06d30e"
+          ],
+          "slug": "prod-1"
+        }
+      }
+    ],
+    "createdAt": "2026-09-06T11:21:42.618Z",
+    "updatedAt": "2026-09-07T17:16:40.860Z"
+  }
+]
