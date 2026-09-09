@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:cloudflare": "npx prisma generate && npx @opennextjs/cloudflare",
-    "deploy": "npx prisma generate && npx @opennextjs/cloudflare && npx wrangler deploy",
+    "build:cloudflare": "npx prisma generate && npx @opennextjs/cloudflare build",
+    "deploy": "npx prisma generate && npx @opennextjs/cloudflare build && npx wrangler deploy",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
