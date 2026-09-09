@@ -234,7 +234,7 @@ async function main() {
       description:
         "তাজা জুঁই ফুলের প্রাকৃতিক নির্যাস মাখানো ফার্স্ট গ্রেড গ্রিন টি। মিষ্টি মন মাতানো সুবাস ও ক্লান্তি দূরকারী সতেজতা।",
       images: [
-        "https://images.unsplash.com/photo-1596719139685-188b48873426?w=800&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80",
         "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80",
       ],
       basePrice: 500,

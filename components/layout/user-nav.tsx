@@ -74,29 +74,31 @@ export function UserNav() {
       )} />
 
       <DropdownMenuContent align="end" className="w-56 p-2 shadow-xl border-border/80 rounded-xl">
-        <DropdownMenuLabel className="p-2 font-normal">
-          <div className="flex flex-col space-y-1">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold leading-none text-foreground truncate">
-                {user.name || "User"}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="p-2 font-normal">
+            <div className="flex flex-col space-y-1">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold leading-none text-foreground truncate">
+                  {user.name || "User"}
+                </p>
+                {isAdmin ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                    <ShieldAlert className="size-3" />
+                    ADMIN
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                    <Sparkles className="size-3" />
+                    MEMBER
+                  </span>
+                )}
+              </div>
+              <p className="text-xs leading-none text-muted-foreground truncate">
+                {user.email}
               </p>
-              {isAdmin ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                  <ShieldAlert className="size-3" />
-                  ADMIN
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                  <Sparkles className="size-3" />
-                  MEMBER
-                </span>
-              )}
             </div>
-            <p className="text-xs leading-none text-muted-foreground truncate">
-              {user.email}
-            </p>
-          </div>
-        </DropdownMenuLabel>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 

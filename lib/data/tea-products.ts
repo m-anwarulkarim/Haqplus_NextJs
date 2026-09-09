@@ -262,7 +262,7 @@ export const TEA_PRODUCTS: TeaProduct[] = [
     weight: "150g",
     origin: "Highland Flower Garden",
     images: [
-      "https://images.unsplash.com/photo-1596719139685-188b48873426?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80",
       "https://images.unsplash.com/photo-1627435601361-ec25f5b1d0e5?w=800&auto=format&fit=crop&q=80",
     ],
     category: "green-tea",
