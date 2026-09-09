@@ -50,8 +50,10 @@ export interface Review {
   userId: string;
   userName?: string;
   userImage?: string;
+  user?: { name: string | null; image: string | null };
   rating: number;
   comment: string;
+  images?: string[];
   createdAt: string | Date;
 }
 
