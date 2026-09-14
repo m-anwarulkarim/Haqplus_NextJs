@@ -1,5 +1,176 @@
 [
   {
+    "id": "cmu0jktsy0004vfikph3yjb2t",
+    "orderNumber": "ORD-963877-7693",
+    "userId": null,
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": null,
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 520,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 520,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "SFR260914ST9A5B057BD",
+    "courierStatus": "in_review",
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_l0ciyj",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "14/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "cmu0jktsz0006vfiko0ibuczd",
+        "orderId": "cmu0jktsy0004vfikph3yjb2t",
+        "productId": "cmtsye862000hvf1onqhke8ft",
+        "variantId": null,
+        "productName": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+        "quantity": 1,
+        "price": 520,
+        "product": {
+          "id": "cmtsye862000hvf1onqhke8ft",
+          "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+          "images": [
+            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80",
+            "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "haqplus-sylhet-orthodox-golden-tip-tea-150g"
+        }
+      }
+    ],
+    "createdAt": "2026-09-14T01:06:03.894Z",
+    "updatedAt": "2026-09-14T16:48:42.792Z"
+  },
+  {
+    "id": "ord_cuid_1789344266195_o4h2l",
+    "orderNumber": "ORD-266178-9345",
+    "userId": "usr-anwarul-admin",
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "Brahmandanga, Munijila\nChaultury Post Office",
+    "subtotal": 860,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 860,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "SFR260914ST012573FBD",
+    "courierStatus": "in_review",
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_wfkwtv",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "14/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1789344266196_0",
+        "orderId": "ord_cuid_1789344266195_o4h2l",
+        "productId": "cmtsye6lh000evf1os90v9tmy",
+        "variantId": null,
+        "productName": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
+        "quantity": 1,
+        "price": 340,
+        "product": {
+          "id": "cmtsye6lh000evf1os90v9tmy",
+          "name": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
+          "images": [
+            "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye6lh000evf1os90v9tmy"
+        }
+      },
+      {
+        "id": "item_1789344266196_1",
+        "orderId": "ord_cuid_1789344266195_o4h2l",
+        "productId": "cmtsye862000hvf1onqhke8ft",
+        "variantId": null,
+        "productName": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+        "quantity": 1,
+        "price": 520,
+        "product": {
+          "id": "cmtsye862000hvf1onqhke8ft",
+          "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+          "images": [
+            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye862000hvf1onqhke8ft"
+        }
+      }
+    ],
+    "createdAt": "2026-09-14T00:04:26.195Z",
+    "updatedAt": "2026-09-14T18:32:32.885Z"
+  },
+  {
+    "id": "ord_cuid_1789342094261_o1pqk",
+    "orderNumber": "ORD-094168-2982",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "bagerhat",
+    "subtotal": 280,
+    "discount": 0,
+    "shippingCharge": 60,
+    "total": 340,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_753wvk",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "14/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "productId": "tea-1",
+        "name": "হকপ্লাস শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (৪০০ গ্রাম)",
+        "price": 280,
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
+      }
+    ],
+    "createdAt": "2026-09-13T23:28:14.261Z",
+    "updatedAt": "2026-09-14T17:53:53.561Z",
+    "advance": 0
+  },
+  {
     "id": "cmtsvbb6i000dvf8gvm4krkd1",
     "orderNumber": "ORD-946570-6983",
     "userId": "usr-anwarul-admin",
@@ -394,7 +565,7 @@
     "total": 280,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -429,7 +600,7 @@
       }
     ],
     "createdAt": "2026-09-08T02:13:56.899Z",
-    "updatedAt": "2026-09-08T02:13:56.899Z"
+    "updatedAt": "2026-09-14T17:49:40.203Z"
   },
   {
     "id": "ord_cuid_1788801530207_hrywd",
@@ -683,9 +854,9 @@
     "total": 260,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "CONFIRMED",
-    "courierTrackingId": null,
-    "courierStatus": null,
+    "orderStatus": "SHIPPED",
+    "courierTrackingId": "SFR260914STCD1E093BD",
+    "courierStatus": "in_review",
     "note": null,
     "items": [
       {
@@ -707,7 +878,7 @@
       }
     ],
     "createdAt": "2026-09-07T03:39:46.571Z",
-    "updatedAt": "2026-09-07T17:31:34.344Z"
+    "updatedAt": "2026-09-14T18:32:42.259Z"
   },
   {
     "id": "ord_cuid_1788752316623_f22n8",

@@ -31,7 +31,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/lib/store/cart-store";
-import { TEA_PRODUCTS } from "@/lib/data/tea-products";
 
 interface OrderItem {
   id: string;
@@ -71,6 +70,9 @@ export default function RokomariStyleAccountPage() {
   // Cart store
   const { addItem } = useCartStore();
 
+  // Wishlist products (fetched from API)
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
+
   useEffect(() => {
     if (session?.user) {
       setName(session.user.name || "");
@@ -98,6 +100,22 @@ export default function RokomariStyleAccountPage() {
       fetchOrders();
     }
   }, [sessionStatus]);
+
+  // Fetch products for wishlist tab
+  useEffect(() => {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products?limit=4");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.products) setWishlistProducts(data.products.slice(0, 4));
+        }
+      } catch (err) {
+        console.warn("Failed to fetch wishlist products:", err);
+      }
+    }
+    fetchProducts();
+  }, []);
 
   if (sessionStatus === "loading") {
     return (
@@ -455,11 +473,11 @@ export default function RokomariStyleAccountPage() {
                   <Heart className="size-5 text-rose-500 fill-rose-500" /> পছন্দের চা পাতার তালিকা (Wishlist)
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {TEA_PRODUCTS.slice(0, 4).map((product) => (
+                  {wishlistProducts.map((product: any) => (
                     <Card key={product.id} className="overflow-hidden border-border/80 group flex flex-col justify-between">
                       <div className="flex gap-3 p-3">
                         <img 
-                          src={product.images[0]} 
+                          src={product.images?.[0] || "/placeholder.png"} 
                           alt={product.name} 
                           className="size-20 rounded-xl object-cover border"
                         />
@@ -467,7 +485,7 @@ export default function RokomariStyleAccountPage() {
                           <h4 className="font-bold text-sm truncate group-hover:text-emerald-600 transition-colors">
                             {product.name}
                           </h4>
-                          <span className="text-xs text-muted-foreground block mb-1">{product.weight}</span>
+                          <span className="text-xs text-muted-foreground block mb-1">{product.category || ""}</span>
                           <span className="text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                             ৳{product.price}
                           </span>
@@ -482,7 +500,7 @@ export default function RokomariStyleAccountPage() {
                               productId: product.id,
                               name: product.name,
                               price: product.price,
-                              image: product.images[0],
+                              image: product.images?.[0] || "/placeholder.png",
                             })
                           }
                         >

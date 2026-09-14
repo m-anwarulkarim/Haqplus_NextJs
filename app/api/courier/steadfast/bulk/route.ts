@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { createSteadfastOrder, getSteadfastCredentials } from "@/lib/courier/steadfast";
 import { getResilientOrders, updateResilientOrder } from "@/lib/orders-store";
+import { detectThanaFromAddress } from "@/lib/courier/thana-resolver";
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { orderIds } = await req.json();
+    const { orderIds, selectedThanas } = await req.json();
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
       return NextResponse.json({ error: "No orders provided" }, { status: 400 });
     }
@@ -63,7 +64,15 @@ export async function POST(req: Request) {
     for (const order of orders) {
       try {
         const codAmount = order.paymentMethod === "COD" ? Number(order.total) : 0;
-        const fullAddress = `${order.address}, ${order.area}, ${order.district}, ${order.division}`;
+        
+        // Check manually selected thana or auto-detect from address
+        const manualThana = selectedThanas?.[order.id];
+        const thanaResolution = detectThanaFromAddress(order.address, order.district);
+        const resolvedThana = manualThana || thanaResolution.matchedThana;
+
+        const thanaTag = resolvedThana ? ` [Thana: ${resolvedThana}]` : "";
+        const fullAddress = `${order.address}${thanaTag}, ${order.district}, ${order.division}`;
+        const noteContent = resolvedThana ? `Thana: ${resolvedThana}` : "Thana: Auto-Check Required";
 
         const res = await createSteadfastOrder({
           invoice: order.orderNumber,
@@ -71,7 +80,7 @@ export async function POST(req: Request) {
           recipient_phone: order.phone,
           recipient_address: fullAddress,
           cod_amount: codAmount,
-          note: order.note || undefined,
+          note: order.note ? `${order.note} | ${noteContent}` : noteContent,
         });
 
         if (res.status === 200 && res.consignment) {

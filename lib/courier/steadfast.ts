@@ -17,6 +17,28 @@ export async function getSteadfastCredentials(): Promise<SteadfastCredentials | 
   return null;
 }
 
+/** Helper to safely parse JSON responses from Steadfast (handles plain text error responses like "Account is inactive") */
+async function safeParseJsonResponse(res: Response): Promise<any> {
+  try {
+    const text = await res.text();
+    if (!text || text.trim() === "") {
+      return { status: res.status, message: `Empty response from Steadfast (HTTP ${res.status})` };
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      const cleanText = text.trim();
+      return {
+        status: res.status || 400,
+        message: cleanText,
+        error: cleanText,
+      };
+    }
+  } catch (err: any) {
+    return { status: 500, error: err.message || "Failed to read response from Steadfast" };
+  }
+}
+
 export interface SteadfastCreateOrderPayload {
   invoice: string;
   recipient_name: string;
@@ -90,7 +112,7 @@ export async function createSteadfastOrder(
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
+    const data = await safeParseJsonResponse(res);
     return data;
   } catch (error) {
     console.error("Steadfast API request error:", error);
@@ -128,7 +150,7 @@ export async function createSteadfastBulkOrders(
       body: JSON.stringify({ data: JSON.stringify(formattedData) }),
     });
 
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast Bulk Create error:", error);
     throw new Error("Failed to bulk create orders with Steadfast");
@@ -155,7 +177,7 @@ export async function getSteadfastStatusByTrackingCode(trackingCode: string) {
         },
       }
     );
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast tracking check error:", error);
     return { status: 500, delivery_status: "unknown" };
@@ -182,7 +204,7 @@ export async function getSteadfastStatusByCid(cid: string | number) {
         },
       }
     );
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast status by CID error:", error);
     return { status: 500, delivery_status: "unknown" };
@@ -209,7 +231,7 @@ export async function getSteadfastStatusByInvoice(invoice: string) {
         },
       }
     );
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast status by invoice error:", error);
     return { status: 500, delivery_status: "unknown" };
@@ -234,7 +256,7 @@ export async function getSteadfastBalance() {
         "Secret-Key": creds.secretKey,
       },
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast balance check error:", error);
     return { status: 500, current_balance: 0, error: "Failed to connect to Steadfast" };
@@ -263,7 +285,7 @@ export async function createSteadfastReturnRequest(payload: {
       },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast return request error:", error);
     throw new Error("Failed to create return request");
@@ -284,7 +306,7 @@ export async function getSteadfastReturnRequest(id: string | number) {
         "Secret-Key": creds.secretKey,
       },
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast single return request error:", error);
     return { status: 500, error: "Failed to fetch return request" };
@@ -305,7 +327,7 @@ export async function getSteadfastReturnRequests() {
         "Secret-Key": creds.secretKey,
       },
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast return requests error:", error);
     return { status: 500, error: "Failed to fetch return requests" };
@@ -326,7 +348,7 @@ export async function getSteadfastPayments() {
         "Secret-Key": creds.secretKey,
       },
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast payments error:", error);
     return { status: 500, error: "Failed to fetch payments" };
@@ -347,11 +369,77 @@ export async function getSteadfastPoliceStations() {
         "Secret-Key": creds.secretKey,
       },
     });
-    return await res.json();
+    return await safeParseJsonResponse(res);
   } catch (error) {
     console.error("Steadfast police stations error:", error);
     return { status: 500, error: "Failed to fetch police stations" };
   }
 }
+
+/** 12. Check Steadfast Customer Fraud History */
+export async function checkSteadfastFraud(phone: string) {
+  const creds = await getSteadfastCredentials();
+  const cleanPhone = (phone || "").replace(/\D/g, "");
+
+  if (!cleanPhone || cleanPhone.length < 10) {
+    return {
+      status: 400,
+      error: "valid 11-digit phone number is required for Steadfast fraud check",
+    };
+  }
+
+  if (!creds) {
+    return {
+      status: 400,
+      error: "Steadfast API Key & Secret Key strictly required. Please set up API credentials in Admin -> API Integration.",
+    };
+  }
+
+  try {
+    const endpoints = [
+      `https://portal.packzy.com/api/v1/fraud_check/${encodeURIComponent(cleanPhone)}`,
+      `https://portal.packzy.com/api/v1/fraud_check?phone=${encodeURIComponent(cleanPhone)}`,
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url, {
+          headers: {
+            "Api-Key": creds.apiKey,
+            "Secret-Key": creds.secretKey,
+          },
+        });
+        const data = await safeParseJsonResponse(res);
+        const inner = data?.data || data;
+        if (
+          res.ok &&
+          inner &&
+          (inner.total_delivred !== undefined ||
+            inner.total_delivered !== undefined ||
+            inner.total_parcels !== undefined ||
+            inner.total_cancelled !== undefined ||
+            inner.total !== undefined)
+        ) {
+          return data;
+        }
+      } catch (err) {
+        // Silent catch for alternate endpoints
+      }
+    }
+
+    // Fallback: Return standard primary endpoint response
+    const resFallback = await fetch(`https://portal.packzy.com/api/v1/fraud_check/${encodeURIComponent(cleanPhone)}`, {
+      headers: {
+        "Api-Key": creds.apiKey,
+        "Secret-Key": creds.secretKey,
+      },
+    });
+    return await safeParseJsonResponse(resFallback);
+  } catch (error) {
+    console.error("Steadfast fraud check error:", error);
+    return { status: 500, error: "Failed to connect to Steadfast Fraud Check API" };
+  }
+}
+
 
 

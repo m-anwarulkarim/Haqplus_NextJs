@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getResilientOrders } from "@/lib/orders-store";
-import { TEA_PRODUCTS } from "@/lib/data/tea-products";
 import Link from "next/link";
 import {
   DollarSign,
@@ -14,24 +13,45 @@ import {
   AlertTriangle,
   CheckCircle2,
   ExternalLink,
+  Truck,
+  Calendar,
+  Wallet,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SalesChart } from "@/components/admin/sales-chart";
 
-export default async function AdminDashboardPage() {
-  const session = await auth();
+interface AdminDashboardPageProps {
+  searchParams: Promise<{ range?: string }>;
+}
 
-  // Aggregate stats from resilient store
-  const resilientOrders = await getResilientOrders();
+export default async function AdminDashboardPage({ searchParams }: AdminDashboardPageProps) {
+  const session = await auth();
+  const params = await searchParams;
+  const range = params.range || "all";
+
+  // Calculate startDate based on range
+  let startDate = new Date(0); // Default 'all'
+  const now = new Date();
+  if (range === "today") {
+    startDate = new Date(now.setHours(0, 0, 0, 0));
+  } else if (range === "week") {
+    startDate = new Date(now.setDate(now.getDate() - 7));
+  } else if (range === "month") {
+    startDate = new Date(now.setMonth(now.getMonth() - 1));
+  }
+
+  // Aggregate stats from resilient store first
+  const allResilientOrders = await getResilientOrders();
+  const resilientOrders = allResilientOrders.filter((o) => new Date(o.createdAt) >= startDate);
 
   let totalRevenue = resilientOrders.reduce((sum, o) => sum + Number(o.total || 0), 0);
   let totalOrders = resilientOrders.length;
   let recentOrders = resilientOrders.slice(0, 6);
-  let totalProducts = TEA_PRODUCTS.length;
-  let lowStockProducts = TEA_PRODUCTS.filter((p) => (p.stock ?? 99) <= 15).slice(0, 4);
-  let lowStockCount = lowStockProducts.length;
+  let totalProducts = 0;
+  let lowStockProducts: any[] = [];
+  let lowStockCount = 0;
 
   const customerMap = new Map<string, boolean>();
   resilientOrders.forEach((o) => {
@@ -42,11 +62,14 @@ export default async function AdminDashboardPage() {
 
   // Try enriching from DB if Postgres is connected
   try {
+    const dateFilter = startDate.getTime() > 0 ? { createdAt: { gte: startDate } } : {};
+
     const [ordersAgg, productsCount, lowStockItems, customersCount, ordersList] =
       await Promise.all([
         prisma.order.aggregate({
           _sum: { total: true },
           _count: { id: true },
+          where: dateFilter,
         }),
         prisma.product.count({ where: { isActive: true } }),
         prisma.product.findMany({
@@ -54,10 +77,11 @@ export default async function AdminDashboardPage() {
           take: 4,
           select: { id: true, name: true, stock: true, sku: true },
         }),
-        prisma.user.count(),
+        prisma.user.count({ where: dateFilter }),
         prisma.order.findMany({
           take: 6,
           orderBy: { createdAt: "desc" },
+          where: dateFilter,
           select: {
             id: true,
             orderNumber: true,
@@ -98,7 +122,7 @@ export default async function AdminDashboardPage() {
     last7DaysMap[dayName] = { revenue: 0, orders: 0 };
   }
 
-  resilientOrders.forEach((o) => {
+  allResilientOrders.forEach((o) => {
     const orderDate = new Date(o.createdAt);
     const dayName = days[orderDate.getDay()];
     if (last7DaysMap[dayName]) {
@@ -113,13 +137,20 @@ export default async function AdminDashboardPage() {
     orders: val.orders,
   }));
 
+  const rangeLabels: Record<string, string> = {
+    today: "Today",
+    week: "Last 7 Days",
+    month: "Last 30 Days",
+    all: "All Time",
+  };
+
   return (
     <div className="space-y-8">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Header Banner & Filters */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Store Performance Overview
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            Store Overview
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Logged in as <span className="font-semibold text-foreground">{session?.user?.name || "Admin"}</span> (
@@ -127,14 +158,31 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button variant="outline" asChild className="rounded-xl">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Time Filter Buttons */}
+          <div className="flex bg-muted/50 p-1 rounded-xl border border-border/80">
+            {Object.entries(rangeLabels).map(([key, label]) => (
+              <Button
+                key={key}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={`text-xs px-3 rounded-lg h-8 ${
+                  range === key ? "bg-background shadow-xs font-bold text-foreground" : "text-muted-foreground"
+                }`}
+              >
+                <Link href={`/admin?range=${key}`}>{label}</Link>
+              </Button>
+            ))}
+          </div>
+          
+          <Button variant="outline" asChild className="rounded-xl h-10 hidden sm:flex">
             <Link href="/" target="_blank" className="gap-1.5">
-              <span>View Storefront</span>
+              <span>Storefront</span>
               <ExternalLink className="size-3.5" />
             </Link>
           </Button>
-          <Button asChild className="rounded-xl shadow-xs">
+          <Button asChild className="rounded-xl shadow-xs h-10">
             <Link href="/admin/products/new">Add Product</Link>
           </Button>
         </div>
@@ -157,7 +205,7 @@ export default async function AdminDashboardPage() {
             </div>
             <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
               <TrendingUp className="size-3" />
-              <span>Lifetime sales volume</span>
+              <span>{rangeLabels[range]}</span>
             </p>
           </CardContent>
         </Card>
@@ -177,7 +225,27 @@ export default async function AdminDashboardPage() {
             </div>
             <p className="text-xs text-blue-600 font-medium flex items-center gap-1 mt-1">
               <TrendingUp className="size-3" />
-              <span>Processed transactions</span>
+              <span>{rangeLabels[range]}</span>
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl border-border/80 shadow-2xs">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-xs font-semibold text-muted-foreground">
+              Customers
+            </CardTitle>
+            <div className="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+              <Users className="size-4" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-extrabold font-mono text-foreground">
+              {totalCustomers}
+            </div>
+            <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
+              <TrendingUp className="size-3" />
+              <span>{rangeLabels[range]}</span>
             </p>
           </CardContent>
         </Card>
@@ -197,26 +265,6 @@ export default async function AdminDashboardPage() {
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {lowStockCount} items low in stock
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-2xl border-border/80 shadow-2xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-xs font-semibold text-muted-foreground">
-              Registered Customers
-            </CardTitle>
-            <div className="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <Users className="size-4" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-extrabold font-mono text-foreground">
-              {totalCustomers}
-            </div>
-            <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
-              <TrendingUp className="size-3" />
-              <span>Active buyer accounts</span>
             </p>
           </CardContent>
         </Card>
@@ -253,7 +301,7 @@ export default async function AdminDashboardPage() {
                 <span>Inventory Alerts</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Products reaching reorder threshold (&le; 5 units).
+                Products reaching reorder threshold (&le; 10 units).
               </CardDescription>
             </CardHeader>
             <CardContent className="p-4 space-y-2.5">
@@ -305,7 +353,7 @@ export default async function AdminDashboardPage() {
             <div>
               <CardTitle className="text-base font-bold">Recent Customer Orders</CardTitle>
               <CardDescription className="text-xs">
-                Latest orders received across web and mobile storefronts.
+                Latest orders received in {rangeLabels[range]}.
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild className="rounded-xl text-xs">
@@ -316,7 +364,7 @@ export default async function AdminDashboardPage() {
         <CardContent className="p-0">
           {recentOrders.length === 0 ? (
             <div className="p-8 text-center text-xs text-muted-foreground">
-              No orders placed yet. New orders will appear here automatically.
+              No orders found for the selected time range.
             </div>
           ) : (
             <div className="divide-y divide-border/60">

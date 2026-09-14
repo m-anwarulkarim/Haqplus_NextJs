@@ -5,7 +5,6 @@ import { ProductFilters } from "@/components/products/product-filters";
 import { ProductSort } from "@/components/products/product-sort";
 import Link from "next/link";
 import { ChevronRight, ShoppingBag, Leaf } from "lucide-react";
-import { TEA_PRODUCTS, TEA_CATEGORIES } from "@/lib/data/tea-products";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -26,11 +25,7 @@ export async function generateMetadata({
     // DB offline
   }
 
-  if (!category) {
-    category = TEA_CATEGORIES.find((c) => c.slug === slug);
-  }
-
-  if (!category) return { title: "ক্যাটাগরি পাওয়া যায়নি — haqplus" };
+  if (!category) return { title: "ক্যাটাগরি পাওয়া যায়নি — haqplus" };
 
   return {
     title: `${category.bengaliName || category.name} — haqplus`,
@@ -113,34 +108,23 @@ export default async function CategoryPage({
     console.warn("Category DB lookup fallback:", err);
   }
 
-  let currentCategory: any = dbCategory;
-  if (!currentCategory) {
-    currentCategory = TEA_CATEGORIES.find((c) => c.slug === slug);
-  }
-
+  const currentCategory: any = dbCategory;
   if (!currentCategory) {
     notFound();
   }
 
   const categoryName = currentCategory.bengaliName || currentCategory.name;
 
-  let formattedCategories = allCategoriesRaw.map((c) => ({
+  const formattedCategories = allCategoriesRaw.map((c) => ({
     id: c.id,
     name: c.name,
     slug: c.slug,
     itemCount: c._count.products,
   }));
 
-  if (formattedCategories.length === 0) {
-    formattedCategories = TEA_CATEGORIES.map((c) => ({
-      id: c.id,
-      name: c.bengaliName,
-      slug: c.slug,
-      itemCount: 4,
-    }));
-  }
 
-  let formattedProducts = dbProducts.map((p) => {
+
+  const formattedProducts = dbProducts.map((p) => {
     const avgRating =
       p.reviews && p.reviews.length > 0
         ? Number(
@@ -170,27 +154,7 @@ export default async function CategoryPage({
     };
   });
 
-  // Fallback to TEA_PRODUCTS filtered by category
-  if (formattedProducts.length === 0) {
-    const matchingTeas = TEA_PRODUCTS.filter(
-      (t) => t.category === slug || t.categorySlug === slug
-    );
 
-    formattedProducts = matchingTeas.map((t) => ({
-      id: t.id,
-      name: t.bengaliName || t.name,
-      slug: t.slug,
-      description: t.description,
-      images: t.images,
-      price: t.price,
-      originalPrice: t.originalPrice,
-      category: t.categoryName,
-      rating: t.rating,
-      reviewCount: t.reviewCount,
-      inStock: t.inStock,
-      isFeatured: t.isFeatured,
-    }));
-  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12">

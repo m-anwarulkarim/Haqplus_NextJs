@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { categorySchema } from "@/lib/validations/product";
-import { TEA_CATEGORIES } from "@/lib/data/tea-products";
 
 export async function GET() {
   try {
@@ -17,20 +16,11 @@ export async function GET() {
         orderBy: { name: "asc" },
       });
     } catch (e) {
-      console.warn("Categories DB query fallback to TEA_CATEGORIES:", e);
+      console.error("Categories DB query error:", e);
     }
 
     if (!categories || categories.length === 0) {
-      return NextResponse.json(
-        TEA_CATEGORIES.map((c) => ({
-          id: c.id,
-          name: c.bengaliName || c.name,
-          slug: c.slug,
-          image: c.image,
-          parentId: null,
-          itemCount: 4,
-        }))
-      );
+      return NextResponse.json([]);
     }
 
     const formatted = categories.map((c) => ({
@@ -47,16 +37,7 @@ export async function GET() {
     return NextResponse.json(formatted);
   } catch (error) {
     console.error("Categories GET error:", error);
-    return NextResponse.json(
-      TEA_CATEGORIES.map((c) => ({
-        id: c.id,
-        name: c.bengaliName || c.name,
-        slug: c.slug,
-        image: c.image,
-        parentId: null,
-        itemCount: 4,
-      }))
-    );
+    return NextResponse.json([]);
   }
 }
 

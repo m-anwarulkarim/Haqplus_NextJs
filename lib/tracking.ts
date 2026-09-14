@@ -7,6 +7,7 @@ declare global {
 }
 
 export type TrackingEventType =
+  | "PageView"
   | "ViewContent"
   | "AddToCart"
   | "InitiateCheckout"
@@ -55,6 +56,7 @@ export function trackEvent(event: TrackingEventType, payload: TrackingPayload = 
   if (typeof window.gtag === "function") {
     try {
       const gaEventMap: Record<TrackingEventType, string> = {
+        PageView: "page_view",
         ViewContent: "view_item",
         AddToCart: "add_to_cart",
         InitiateCheckout: "begin_checkout",
@@ -95,6 +97,7 @@ export function trackEvent(event: TrackingEventType, payload: TrackingPayload = 
 
   // 4. Server-Side Meta Conversions API (CAPI)
   if (
+    event === "PageView" ||
     event === "Purchase" ||
     event === "InitiateCheckout" ||
     event === "AddToCart" ||

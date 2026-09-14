@@ -3,21 +3,55 @@ import { Flame, Sparkles, Tag, ArrowRight, Clock, ShieldCheck, Truck, Check } fr
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/store/product-card";
-import { TEA_PRODUCTS } from "@/lib/data/tea-products";
+import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "স্পেশাল অফার ও ডিসকাউন্ট — haqplus Deals",
-  description: "শ্রীমঙ্গলের প্রিমিয়াম অর্গানিক চা পাতায় সেরা অফার ও বিশেষ ছাড়। সীমিত সময়ের জন্য বিশেষ মূল্যে অর্ডার করুন।",
+  description: "শ্রীমঙ্গলের প্রিমিয়াম অর্গানিক চা পাতায় সেরা অফার ও বিশেষ ছাড়। সীমিত সময়ের জন্য বিশেষ মূল্যে অর্ডার করুন।",
 };
 
-export default function DealsPage() {
-  // Teas that have discount or special price
-  const dealProducts = TEA_PRODUCTS.filter(
-    (p) => (p.originalPrice && p.originalPrice > p.price) || p.discountPrice
-  );
+export default async function DealsPage() {
+  // Fetch products that have a discount price from DB
+  const dbDeals = await prisma.product.findMany({
+    where: { isActive: true, discountPrice: { not: null } },
+    include: {
+      category: { select: { name: true, slug: true } },
+      reviews: { select: { rating: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const dealProducts = dbDeals.map((p) => {
+    const basePriceNum = Number(p.basePrice);
+    const discountPriceNum = p.discountPrice ? Number(p.discountPrice) : null;
+    const avgRating =
+      p.reviews && p.reviews.length > 0
+        ? Number(
+            (
+              p.reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) /
+              p.reviews.length
+            ).toFixed(1)
+          )
+        : 5.0;
+
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      description: p.description,
+      images: p.images,
+      price: discountPriceNum ?? basePriceNum,
+      originalPrice: discountPriceNum ? basePriceNum : undefined,
+      category: p.category.name,
+      rating: avgRating,
+      reviewCount: p.reviews?.length || 0,
+      inStock: p.stock > 0,
+      isFeatured: p.isFeatured,
+    };
+  });
 
   const coupons = [
     {

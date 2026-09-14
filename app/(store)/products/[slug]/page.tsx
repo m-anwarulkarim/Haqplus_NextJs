@@ -4,7 +4,6 @@ import { ProductDetailView } from "@/components/products/product-detail-view";
 import { ProductCard } from "@/components/store/product-card";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { TEA_PRODUCTS } from "@/lib/data/tea-products";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -25,11 +24,7 @@ export async function generateMetadata({
     // DB offline
   }
 
-  if (!product) {
-    product = TEA_PRODUCTS.find((t) => t.slug === slug || t.id === slug);
-  }
-
-  if (!product) return { title: "চা পাওয়া যায়নি — haqplus" };
+  if (!product) return { title: "চা পাওয়া যায়নি — haqplus" };
 
   return {
     title: `${product.bengaliName || product.name} — Buy Online at haqplus`,
@@ -146,67 +141,7 @@ export default async function ProductDetailPage({
       })),
     };
   } else {
-    // Fallback to TEA_PRODUCTS
-    const tea = TEA_PRODUCTS.find((t) => t.slug === slug || t.id === slug);
-    if (!tea) {
-      notFound();
-    }
-    formattedProduct = {
-      id: tea.id,
-      name: tea.bengaliName || tea.name,
-      slug: tea.slug,
-      description: tea.description,
-      images: tea.images,
-      basePrice: tea.basePrice,
-      discountPrice: tea.discountPrice,
-      price: tea.price,
-      originalPrice: tea.originalPrice,
-      sku: tea.sku,
-      stock: tea.stock,
-      categoryId: tea.category,
-      category: tea.categoryName,
-      categorySlug: tea.categorySlug,
-      isFeatured: tea.isFeatured,
-      isActive: tea.isActive,
-      rating: tea.rating,
-      reviewCount: tea.reviewCount,
-      inStock: tea.inStock,
-      variants: [
-        {
-          id: `${tea.id}-std`,
-          productId: tea.id,
-          size: tea.weight,
-          price: tea.price,
-          stock: tea.stock,
-          sku: tea.sku,
-        },
-      ],
-      reviews: [
-        {
-          id: "rev-1",
-          productId: tea.id,
-          userId: "user-1",
-          userName: "রফিক আহমেদ",
-          rating: 5,
-          comment: "চায়ের লিকার খুব কড়া ও সুবাস চমৎকার। শ্রীমঙ্গলের আসল চায়ের স্বাদ পেলাম!",
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    };
-
-    const otherTeas = TEA_PRODUCTS.filter((t) => t.id !== tea.id).slice(0, 3);
-    relatedProductsRaw = otherTeas.map((t) => ({
-      id: t.id,
-      name: t.bengaliName || t.name,
-      slug: t.slug,
-      description: t.description,
-      images: t.images,
-      basePrice: t.basePrice,
-      discountPrice: t.discountPrice,
-      category: { name: t.categoryName },
-      reviews: [{ rating: 5 }],
-      stock: t.stock,
-    }));
+    notFound();
   }
 
   const formattedRelated = relatedProductsRaw.map((p) => {

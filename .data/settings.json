@@ -1,6 +1,6 @@
 {
-  "STEADFAST_API_KEY": "lmxew3tncdlicpkpc6hahevuuswks308",
-  "STEADFAST_SECRET_KEY": "dydzwwpezgcd1sci0oiqlmyx",
+  "STEADFAST_API_KEY": "eqegau1wceobpc8ghbt2glt1ssxonkqp",
+  "STEADFAST_SECRET_KEY": "apgpewveidczs83uccjqlc7o",
   "SHIPPING_INSIDE_DHAKA": "70",
   "SHIPPING_OUTSIDE_DHAKA": "130",
   "smsBaseUrl": "https://api.sms-provider.com/v1",
@@ -17,5 +17,6 @@
   "gtmId": "",
   "googleVerification": "",
   "smsOrderPlacedTemplate": "প্রিয় {name}, haqplus এ আপনার অর্ডার #{order_id} সফল হয়েছে। মোট: ৳{total}।",
-  "smsOrderShippedTemplate": "প্রিয় {name}, আপনার অর্ডার #{order_id} কুরিয়ারে পাঠানো হয়েছে। ট্র্যাকিং ID: {tracking_id}।"
+  "smsOrderShippedTemplate": "প্রিয় {name}, আপনার অর্ডার #{order_id} কুরিয়ারে পাঠানো হয়েছে। ট্র্যাকিং ID: {tracking_id}।",
+  "STEADFAST_WEBHOOK_TOKEN": "08e9a181b9759a2e12bb2d97d4814dae9c584a7c39e8808788a1625cb267e95b"
 }

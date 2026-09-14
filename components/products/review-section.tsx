@@ -108,7 +108,7 @@ export function ReviewSection({
   return (
     <div className="space-y-8 py-6">
       {/* Overview Rating Stats */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 rounded-3xl border border-border/80 bg-emerald-950/5 dark:bg-emerald-950/20 p-6 sm:p-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 rounded-3xl border border-white/20 bg-emerald-950/5 dark:bg-white/5 p-6 sm:p-8 backdrop-blur-xl shadow-lg">
         <div className="flex items-center gap-5">
           <div className="flex size-20 items-center justify-center rounded-2xl bg-amber-500 text-slate-950 font-black text-3xl shadow-lg">
             {rating > 0 ? rating.toFixed(1) : "5.0"}
@@ -283,7 +283,7 @@ export function ReviewSection({
             return (
               <div
                 key={rev.id}
-                className="rounded-3xl border border-border/80 bg-card p-5 sm:p-6 space-y-4 shadow-xs hover:border-emerald-500/30 transition-all"
+                className="rounded-3xl border border-white/10 bg-card/60 backdrop-blur-md p-5 sm:p-6 space-y-4 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-center gap-3">

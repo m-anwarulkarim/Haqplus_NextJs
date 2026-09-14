@@ -116,9 +116,20 @@ export default async function OrderTrackPage({ params }: OrderTrackPageProps) {
             </div>
 
             {order.courierTrackingId && (
-              <span className="font-mono text-xs bg-muted px-2.5 py-1 rounded-xl font-bold text-foreground">
-                {order.courierTrackingId}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs bg-muted px-2.5 py-1 rounded-xl font-bold text-foreground">
+                  {order.courierTrackingId}
+                </span>
+                <a
+                  href={`https://steadfast.com.bd/tl/${order.courierTrackingId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition shadow-2xs"
+                >
+                  <span>Track Live</span>
+                  <ExternalLink className="size-3" />
+                </a>
+              </div>
             )}
           </div>
 

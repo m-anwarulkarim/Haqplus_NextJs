@@ -16,6 +16,10 @@ import {
   AlertCircle,
   Code2,
   Plug,
+  Copy,
+  Check,
+  RotateCcw,
+  Link2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +34,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 
+const DEFAULT_WEBHOOK_TOKEN = "cea049f22c9296708185a89bbe3c17b57039bf61f0ab9eb1427d225419aeb941";
+
 export default function AdminApiIntegrationsPage() {
   const [activeModal, setActiveModal] = useState<
     "courier" | "sms" | "fraud" | "meta" | "notifications" | null
@@ -37,12 +43,14 @@ export default function AdminApiIntegrationsPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Unified Form State for all APIs
   const [formData, setFormData] = useState({
     // Courier (Steadfast)
     STEADFAST_API_KEY: "",
     STEADFAST_SECRET_KEY: "",
+    STEADFAST_WEBHOOK_TOKEN: DEFAULT_WEBHOOK_TOKEN,
     SHIPPING_INSIDE_DHAKA: "70",
     SHIPPING_OUTSIDE_DHAKA: "130",
 
@@ -70,6 +78,15 @@ export default function AdminApiIntegrationsPage() {
     smsOrderShippedTemplate: "প্রিয় {name}, আপনার অর্ডার #{order_id} কুরিয়ারে পাঠানো হয়েছে। ট্র্যাকিং ID: {tracking_id}।",
   });
 
+  // Dynamic origin for callback url
+  const [callbackUrl, setCallbackUrl] = useState("https://haqplus.com/api/webhook/steadfast");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCallbackUrl(`${window.location.origin}/api/webhook/steadfast`);
+    }
+  }, []);
+
   // Action states
   const [isCheckingBalance, setIsCheckingBalance] = useState(false);
   const [balanceResult, setBalanceResult] = useState<any>(null);
@@ -87,6 +104,7 @@ export default function AdminApiIntegrationsPage() {
           ...prev,
           STEADFAST_API_KEY: data.STEADFAST_API_KEY || prev.STEADFAST_API_KEY,
           STEADFAST_SECRET_KEY: data.STEADFAST_SECRET_KEY || prev.STEADFAST_SECRET_KEY,
+          STEADFAST_WEBHOOK_TOKEN: data.STEADFAST_WEBHOOK_TOKEN || DEFAULT_WEBHOOK_TOKEN,
           SHIPPING_INSIDE_DHAKA: data.SHIPPING_INSIDE_DHAKA || prev.SHIPPING_INSIDE_DHAKA,
           SHIPPING_OUTSIDE_DHAKA: data.SHIPPING_OUTSIDE_DHAKA || prev.SHIPPING_OUTSIDE_DHAKA,
           metaPixelId: data.metaPixelId || prev.metaPixelId,
@@ -103,6 +121,23 @@ export default function AdminApiIntegrationsPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(text);
+    toast.success(label);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleRegenerateToken = () => {
+    const chars = "abcdef0123456789";
+    let newToken = "";
+    for (let i = 0; i < 64; i++) {
+      newToken += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setFormData((prev) => ({ ...prev, STEADFAST_WEBHOOK_TOKEN: newToken }));
+    toast.success("New Auth Token generated! Remember to click Save Configuration.");
   };
 
   useEffect(() => {
@@ -409,6 +444,99 @@ export default function AdminApiIntegrationsPage() {
                   onChange={handleChange}
                   className="rounded-xl font-mono text-xs"
                 />
+              </div>
+            </div>
+
+            {/* WEBHOOK SETUP SECTION MATCHING USER SCREENSHOT */}
+            <div className="border-t border-border/60 pt-4 space-y-3.5">
+              <div className="flex items-center gap-2 text-xs font-extrabold tracking-wider text-muted-foreground uppercase">
+                <Link2 className="size-4 text-purple-500" />
+                <span>WEBHOOK SETUP</span>
+              </div>
+
+              {/* 1. Callback URL */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <span>🔗 Callback URL</span>
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={callbackUrl}
+                    className="rounded-xl font-mono text-xs bg-muted/40 text-foreground border-border/80"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => copyToClipboard(callbackUrl, "Callback URL copied!")}
+                    title="Copy Callback URL"
+                    className="rounded-xl shrink-0 border-border/80 hover:bg-purple-500/10 hover:border-purple-500/40"
+                  >
+                    {copiedField === callbackUrl ? (
+                      <Check className="size-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="size-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* 2. Auth Token (Bearer) */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <span>🛡️ Auth Token (Bearer)</span>
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={formData.STEADFAST_WEBHOOK_TOKEN || DEFAULT_WEBHOOK_TOKEN}
+                    className="rounded-xl font-mono text-xs bg-muted/40 text-foreground border-border/80"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() =>
+                      copyToClipboard(
+                        formData.STEADFAST_WEBHOOK_TOKEN || DEFAULT_WEBHOOK_TOKEN,
+                        "Auth Token copied!"
+                      )
+                    }
+                    title="Copy Auth Token"
+                    className="rounded-xl shrink-0 border-border/80 hover:bg-purple-500/10 hover:border-purple-500/40"
+                  >
+                    {copiedField === (formData.STEADFAST_WEBHOOK_TOKEN || DEFAULT_WEBHOOK_TOKEN) ? (
+                      <Check className="size-4 text-emerald-500" />
+                    ) : (
+                      <Copy className="size-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* 3. Regenerate Token & Active Status */}
+              <div className="flex items-center justify-between pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRegenerateToken}
+                  className="rounded-xl text-xs gap-1.5 border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 font-bold"
+                >
+                  <RotateCcw className="size-3.5" />
+                  <span>Regenerate</span>
+                </Button>
+
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-xs font-bold">
+                  <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Active</span>
+                </div>
+              </div>
+
+              {/* 4. Instructions Box */}
+              <div className="p-3 rounded-xl bg-purple-500/5 border border-purple-500/20 text-[11px] text-muted-foreground leading-relaxed">
+                💡 <strong>Steadfast Portal Setup:</strong> Go to your Steadfast Merchant Account (<code>portal.packzy.com</code>) &gt; <strong>Settings / Webhook</strong> and paste the <strong>Callback URL</strong> and <strong>Auth Token</strong> above.
               </div>
             </div>
           </div>

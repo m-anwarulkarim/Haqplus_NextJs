@@ -3,7 +3,6 @@ import { ProductCard } from "@/components/store/product-card";
 import { ProductFilters } from "@/components/products/product-filters";
 import { ProductSort } from "@/components/products/product-sort";
 import { ShoppingBag, Leaf } from "lucide-react";
-import { TEA_PRODUCTS, TEA_CATEGORIES } from "@/lib/data/tea-products";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -81,32 +80,22 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
         orderBy,
       }),
     ]);
-    if (fetchedProducts && fetchedProducts.length > 0) {
-      categories = fetchedCategories;
-      rawProducts = fetchedProducts;
-    }
+    categories = fetchedCategories;
+    rawProducts = fetchedProducts;
   } catch (err) {
-    console.warn("Products DB lookup fallback to tea catalog:", err);
+    console.error("Products DB lookup error:", err);
   }
 
-  let formattedCategories = categories.map((c) => ({
+  const formattedCategories = categories.map((c) => ({
     id: c.id,
     name: c.name,
     slug: c.slug,
     itemCount: c._count.products,
   }));
 
-  // Fallback to TEA_CATEGORIES if DB categories are empty
-  if (formattedCategories.length === 0) {
-    formattedCategories = TEA_CATEGORIES.map((c) => ({
-      id: c.id,
-      name: c.bengaliName,
-      slug: c.slug,
-      itemCount: 4,
-    }));
-  }
 
-  let products = rawProducts.map((p) => {
+
+  const products = rawProducts.map((p) => {
     const avgRating =
       p.reviews && p.reviews.length > 0
         ? Number(
@@ -138,50 +127,7 @@ export default async function ProductsCatalogPage({ searchParams }: ProductsPage
     };
   });
 
-  // Fallback to TEA_PRODUCTS if DB has no products
-  if (products.length === 0) {
-    let fallbackTeas = [...TEA_PRODUCTS];
-    if (category) {
-      fallbackTeas = fallbackTeas.filter(
-        (t) => t.category === category || t.categorySlug === category
-      );
-    }
-    if (search) {
-      const q = search.toLowerCase();
-      fallbackTeas = fallbackTeas.filter(
-        (t) =>
-          t.name.toLowerCase().includes(q) ||
-          t.bengaliName.toLowerCase().includes(q) ||
-          t.description.toLowerCase().includes(q)
-      );
-    }
-    if (minPrice !== undefined) {
-      fallbackTeas = fallbackTeas.filter((t) => t.price >= minPrice);
-    }
-    if (maxPrice !== undefined) {
-      fallbackTeas = fallbackTeas.filter((t) => t.price <= maxPrice);
-    }
-    if (sort === "price-asc") {
-      fallbackTeas.sort((a, b) => a.price - b.price);
-    } else if (sort === "price-desc") {
-      fallbackTeas.sort((a, b) => b.price - a.price);
-    }
 
-    products = fallbackTeas.map((t) => ({
-      id: t.id,
-      name: t.bengaliName || t.name,
-      slug: t.slug,
-      description: t.description,
-      images: t.images,
-      price: t.price,
-      originalPrice: t.originalPrice,
-      category: t.categoryName,
-      rating: t.rating,
-      reviewCount: t.reviewCount,
-      inStock: t.inStock,
-      isFeatured: t.isFeatured,
-    }));
-  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-8 md:py-12">

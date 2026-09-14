@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { productSchema } from "@/lib/validations/product";
-import { TEA_PRODUCTS } from "@/lib/data/tea-products";
 
 export async function GET(req: Request) {
   try {
@@ -74,73 +73,7 @@ export async function GET(req: Request) {
       console.warn("Products DB fetch fallback:", dbErr);
     }
 
-    if (products.length === 0) {
-      // Return HaqPlus tea products fallback
-      let teaList = [...TEA_PRODUCTS];
-      if (category) {
-        teaList = teaList.filter((t) => t.category === category || t.categorySlug === category);
-      }
-      if (search) {
-        const q = search.toLowerCase();
-        teaList = teaList.filter(
-          (t) =>
-            t.name.toLowerCase().includes(q) ||
-            t.bengaliName.toLowerCase().includes(q) ||
-            t.description.toLowerCase().includes(q)
-        );
-      }
-      if (minPrice !== undefined) {
-        teaList = teaList.filter((t) => t.price >= minPrice);
-      }
-      if (maxPrice !== undefined) {
-        teaList = teaList.filter((t) => t.price <= maxPrice);
-      }
-      total = teaList.length;
 
-      const formattedTeas = teaList.map((t) => ({
-        id: t.id,
-        name: t.bengaliName || t.name,
-        slug: t.slug,
-        description: t.description,
-        images: t.images,
-        basePrice: t.basePrice,
-        discountPrice: t.discountPrice,
-        price: t.price,
-        originalPrice: t.originalPrice,
-        sku: t.sku,
-        stock: t.stock,
-        categoryId: t.category,
-        category: t.categoryName,
-        categorySlug: t.categorySlug,
-        isFeatured: t.isFeatured,
-        isActive: t.isActive,
-        metaTitle: t.metaTitle,
-        metaDescription: t.metaDescription,
-        rating: t.rating,
-        reviewCount: t.reviewCount,
-        inStock: t.inStock,
-        variants: [
-          {
-            id: `${t.id}-std`,
-            productId: t.id,
-            size: t.weight,
-            price: t.price,
-            stock: t.stock,
-            sku: t.sku,
-          },
-        ],
-      }));
-
-      return NextResponse.json({
-        products: formattedTeas,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      });
-    }
 
     const formattedProducts = products.map((p) => {
       const avgRating =

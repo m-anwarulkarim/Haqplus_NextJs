@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { RootProvider } from "@/components/providers/root-provider";
+import { TrackingScripts } from "@/components/tracking/tracking-scripts";
+import { PageViewTracker } from "@/components/tracking/page-view-tracker";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,8 +39,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/15 selection:text-primary">
+      <body
+        className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/15 selection:text-primary"
+        suppressHydrationWarning
+      >
         <RootProvider>{children}</RootProvider>
+        <TrackingScripts />
+        <PageViewTracker />
       </body>
     </html>
   );

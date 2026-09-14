@@ -37,7 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
-import { TEA_PRODUCTS, TeaProduct } from "@/lib/data/tea-products";
+
 
 export default function AdminCreateNewOrderPage() {
   const router = useRouter();
@@ -58,7 +58,7 @@ export default function AdminCreateNewOrderPage() {
   const [items, setItems] = useState<any[]>([]);
 
   // Product Catalog & Search State
-  const [catalogProducts, setCatalogProducts] = useState<any[]>(TEA_PRODUCTS);
+  const [catalogProducts, setCatalogProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Customer History & Fraud check state based on typed phone

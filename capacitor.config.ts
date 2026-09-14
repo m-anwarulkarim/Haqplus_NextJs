@@ -1,4 +1,4 @@
-// @ts-ignore
+// @ts-expect-error
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {

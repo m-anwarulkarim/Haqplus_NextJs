@@ -1,8 +1,28 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getResilientSetting } from "@/lib/settings-store";
 
 export async function POST(req: Request) {
   try {
+    // 1. Optional Auth Token (Bearer) Validation
+    const configuredToken = await getResilientSetting("STEADFAST_WEBHOOK_TOKEN");
+    if (configuredToken && configuredToken.trim() !== "") {
+      const authHeader = req.headers.get("authorization");
+      const customTokenHeader = req.headers.get("x-webhook-token") || req.headers.get("token");
+
+      let providedToken = "";
+      if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+        providedToken = authHeader.substring(7).trim();
+      } else if (customTokenHeader) {
+        providedToken = customTokenHeader.trim();
+      }
+
+      if (providedToken !== configuredToken.trim()) {
+        console.warn("Steadfast webhook unauthorized token attempt");
+        return NextResponse.json({ error: "Unauthorized webhook token" }, { status: 401 });
+      }
+    }
+
     const body = await req.json();
     const { invoice, tracking_code, status } = body;
 
@@ -51,3 +71,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Webhook error" }, { status: 500 });
   }
 }
+

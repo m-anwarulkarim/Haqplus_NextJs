@@ -2,13 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star, ShoppingBag, Heart } from "lucide-react";
+import { Star, ShoppingBag, Heart, Check, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useCartStore } from "@/lib/store/cart-store";
 import { toast } from "@/components/ui/toast";
 import type { Product } from "@/types";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +17,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
+  const [isSelected, setIsSelected] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   // Discount % হিসাব
   const discount = product.originalPrice
@@ -31,14 +34,60 @@ export function ProductCard({ product }: ProductCardProps) {
       image: product.images[0] || "/placeholder.png",
       category: product.category,
     });
+    setIsSelected(true);
     toast.success(`${product.name} কার্টে যোগ হয়েছে!`);
   };
 
+  const handleIncrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setQuantity(prev => prev + 1);
+    // Ideally we would update cart item quantity here
+  };
+
+  const handleDecrement = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (quantity > 1) {
+      setQuantity(prev => prev - 1);
+      // Ideally we would update cart item quantity here
+    } else {
+      setIsSelected(false);
+    }
+  };
+
   return (
-    // shadcn Card — default padding override করে edge-to-edge image রাখা হলো
-    <Card className="group relative gap-0 overflow-hidden rounded-xl border-border/70 py-0 shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-600/40 hover:shadow-lg sm:rounded-2xl">
-      {/* Product Image Link */}
-      <div className="relative aspect-square w-full overflow-hidden bg-muted/40">
+    <Card className={`group relative flex flex-col overflow-hidden rounded-[20px] bg-white transition-all duration-300 hover:shadow-xl sm:rounded-[24px] ${isSelected ? 'border-2 border-emerald-600 shadow-md' : 'border border-border/60 hover:border-emerald-600/50'}`}>
+      
+      {/* Selected Badge (Top Left inside image) */}
+      {isSelected && (
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-1 text-[10px] font-bold text-white shadow-md sm:text-[11px]">
+          <Check className="size-3" />
+          <span>নির্বাচিত</span>
+        </div>
+      )}
+
+      {/* Discount Badge */}
+      {!isSelected && discount > 0 && (
+        <Badge className="absolute top-3 left-3 z-20 rounded-full border-0 bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm sm:text-[11px]">
+          -{discount}%
+        </Badge>
+      )}
+
+      {/* Wishlist Button */}
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toast.success(`${product.name} উইশলিস্টে সেভ হয়েছে!`);
+        }}
+        className="absolute top-3 right-3 z-20 flex size-8 items-center justify-center rounded-full bg-white/90 text-muted-foreground opacity-100 shadow-sm backdrop-blur-sm transition-all hover:bg-rose-50 hover:text-rose-500 sm:size-9 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+        aria-label="Add to wishlist"
+      >
+        <Heart className="size-4 sm:size-4.5" />
+      </button>
+
+      {/* Product Image Area */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F8F9FA]">
         <Link
           href={`/products/${product.slug}`}
           className="relative block size-full cursor-pointer"
@@ -47,77 +96,91 @@ export function ProductCard({ product }: ProductCardProps) {
             src={product.images[0] || "/placeholder.png"}
             alt={product.name}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-
-          {/* Discount Badge — shadcn Badge ব্যবহার করা হলো */}
-          {discount > 0 && (
-            <Badge className="absolute top-2 left-2 rounded-full border-0 bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm hover:bg-emerald-600 sm:text-[11px]">
-              -{discount}%
-            </Badge>
-          )}
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
         </Link>
-
-        {/* Wishlist button — mobile-এ সবসময় visible (touch এ hover কাজ করে না) */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toast.success(`${product.name} উইশলিস্টে সেভ হয়েছে!`);
-          }}
-          className="absolute top-2 right-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/90 text-foreground opacity-100 shadow-md transition-all hover:bg-emerald-600 hover:text-white sm:size-8 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
-          aria-label="Add to wishlist"
-        >
-          <Heart className="size-3.5 sm:size-4" />
-        </button>
       </div>
 
-      {/* Content */}
-      <CardContent className="flex flex-1 flex-col gap-1 p-2.5 sm:p-4">
-        <div className="flex items-center justify-between text-[10px] text-muted-foreground sm:text-xs">
-          <span className="truncate font-medium capitalize">{product.category}</span>
-          <div className="flex shrink-0 items-center gap-1 text-amber-500">
-            <Star className="size-3 fill-amber-500 text-amber-500 sm:size-3.5" />
-            <span className="font-bold text-foreground">{product.rating}</span>
+      {/* Content Area */}
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <CardContent className="flex flex-1 flex-col items-center p-0 text-center">
+          
+          <Link href={`/products/${product.slug}`} className="cursor-pointer w-full">
+            <h3 className="mb-2 line-clamp-1 text-[15px] sm:text-[17px] font-extrabold text-[#0D4424] transition-colors group-hover:text-emerald-700">
+              {product.name}
+            </h3>
+          </Link>
+
+          <p className="mb-4 text-[11px] sm:text-[12px] leading-relaxed text-muted-foreground/90 line-clamp-2 px-1">
+            {product.description}
+          </p>
+
+          <div className="mt-auto flex flex-col items-center justify-center gap-1">
+            <div className="flex items-center justify-center gap-2">
+              {product.originalPrice && (
+                <span className="font-mono text-[12px] sm:text-[13px] text-muted-foreground/70 line-through">
+                  ৳{product.originalPrice.toFixed(0)}
+                </span>
+              )}
+              <span className="font-mono text-[18px] sm:text-[22px] font-black text-emerald-600">
+                ৳{product.price.toFixed(0)}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-muted-foreground/80 font-medium">
+              <span className="text-emerald-600/40">◟</span>
+              <span>{product.category || "১ প্যাক"}</span>
+            </div>
           </div>
-        </div>
+        </CardContent>
 
-        <Link href={`/products/${product.slug}`} className="cursor-pointer">
-          <h3 className="line-clamp-1 text-[13px] leading-snug font-semibold text-foreground transition-colors group-hover:text-emerald-600 sm:text-sm">
-            {product.name}
-          </h3>
-        </Link>
-
-        {/* Description — মোবাইলে hide, জায়গা বাঁচাতে */}
-        <p className="hidden text-xs text-muted-foreground line-clamp-1 sm:block">
-          {product.description}
-        </p>
-      </CardContent>
-
-      {/* Price + Add to cart */}
-      <CardFooter className="flex items-center justify-between gap-2 p-2.5 pt-0 sm:p-4 sm:pt-0">
-        <div className="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-1.5">
-          <span className="truncate font-mono text-sm font-extrabold text-foreground sm:text-base">
-            ৳{product.price.toFixed(0)}
-          </span>
-          {product.originalPrice && (
-            <span className="font-mono text-[10px] text-muted-foreground line-through sm:text-xs">
-              ৳{product.originalPrice.toFixed(0)}
-            </span>
+        {/* Action Area */}
+        <CardFooter className="mt-5 flex flex-col p-0">
+          {!isSelected ? (
+            <Button
+              onClick={handleAddToCart}
+              variant="outline"
+              className="w-full h-10 sm:h-11 rounded-[12px] sm:rounded-[14px] border-emerald-600/30 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all gap-2 bg-white"
+            >
+              <ShoppingBag className="size-4" />
+              <span className="text-[13px] sm:text-[14px] font-bold tracking-wide">নির্বাচন করুন</span>
+            </Button>
+          ) : (
+            <div className="flex w-full flex-col gap-2">
+              <Button
+                className="w-full h-10 sm:h-11 rounded-[12px] sm:rounded-[14px] bg-emerald-600 text-white hover:bg-emerald-700 transition-all gap-2 cursor-default pointer-events-none"
+              >
+                <Check className="size-4" />
+                <span className="text-[13px] sm:text-[14px] font-bold tracking-wide">নির্বাচিত</span>
+              </Button>
+              
+              <div className="flex items-center justify-between rounded-[12px] sm:rounded-[14px] border border-emerald-200 bg-emerald-50/50 p-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDecrement}
+                  className="size-8 rounded-[10px] text-emerald-700 hover:bg-white hover:text-emerald-800 hover:shadow-sm transition-all"
+                >
+                  <Minus className="size-3.5" />
+                </Button>
+                <span className="font-mono text-[14px] font-bold text-emerald-800 w-8 text-center">
+                  {quantity}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleIncrement}
+                  className="size-8 rounded-[10px] text-emerald-700 hover:bg-white hover:text-emerald-800 hover:shadow-sm transition-all"
+                >
+                  <Plus className="size-3.5" />
+                </Button>
+              </div>
+            </div>
           )}
-        </div>
-
-        <Button
-          size="sm"
-          onClick={handleAddToCart}
-          className="h-7 shrink-0 gap-1 rounded-lg bg-emerald-600 px-2.5 hover:bg-emerald-700 sm:h-8 sm:gap-1.5 sm:rounded-xl sm:px-3"
-        >
-          <ShoppingBag className="size-3 sm:size-3.5" />
-          <span className="text-[11px] font-semibold sm:text-xs">যোগ করুন</span>
-        </Button>
-      </CardFooter>
+        </CardFooter>
+      </div>
     </Card>
   );
 }

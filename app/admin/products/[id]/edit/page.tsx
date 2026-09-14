@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { ProductForm } from "@/components/admin/product-form";
-import { TEA_PRODUCTS, TEA_CATEGORIES } from "@/lib/data/tea-products";
 import type { Product } from "@/types";
 
 export const metadata = {
@@ -40,7 +39,7 @@ export default async function AdminEditProductPage({
   }
 
   // Format categories list
-  let categories = rawCategories.map((c) => ({
+  const categories = rawCategories.map((c) => ({
     id: c.id,
     name: c.name,
     slug: c.slug,
@@ -49,13 +48,7 @@ export default async function AdminEditProductPage({
   }));
 
   if (categories.length === 0) {
-    categories = TEA_CATEGORIES.map((c) => ({
-      id: c.id,
-      name: c.name,
-      slug: c.slug,
-      image: c.image,
-      parentId: undefined,
-    }));
+    // No categories found in DB
   }
 
   let initialData: Product | null = null;
@@ -89,40 +82,6 @@ export default async function AdminEditProductPage({
         sku: v.sku,
       })),
     };
-  } else {
-    // Look up in fallback store (TEA_PRODUCTS)
-    const teaProd = TEA_PRODUCTS.find((p) => p.id === id || p.slug === id);
-    if (teaProd) {
-      initialData = {
-        id: teaProd.id,
-        name: teaProd.name,
-        slug: teaProd.slug,
-        description: teaProd.description,
-        images: teaProd.images,
-        basePrice: teaProd.basePrice,
-        discountPrice: teaProd.discountPrice,
-        price: teaProd.price,
-        sku: teaProd.sku,
-        stock: teaProd.stock,
-        categoryId: categories[0]?.id || "cat-black-tea",
-        category: teaProd.categoryName || "Black Tea",
-        isFeatured: teaProd.isFeatured,
-        isActive: teaProd.isActive,
-        metaTitle: teaProd.metaTitle,
-        metaDescription: teaProd.metaDescription,
-        inStock: teaProd.inStock,
-        variants: teaProd.variants
-          ? teaProd.variants.map((v) => ({
-              id: v.id,
-              productId: teaProd.id,
-              size: v.size,
-              price: v.price,
-              stock: v.stock,
-              sku: v.sku,
-            }))
-          : [],
-      };
-    }
   }
 
   if (!initialData) {

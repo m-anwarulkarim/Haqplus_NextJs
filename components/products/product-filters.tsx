@@ -87,7 +87,7 @@ export function ProductFilters({ categories }: ProductFiltersProps) {
   const hasActiveFilters = Boolean(currentCategory || currentMinPrice || currentMaxPrice);
 
   return (
-    <div className="space-y-6 rounded-3xl border border-border/80 bg-card p-5 shadow-2xs">
+    <div className="space-y-6 rounded-3xl border border-white/20 bg-card/60 p-5 shadow-lg backdrop-blur-xl">
       <div className="flex items-center justify-between border-b border-border/60 pb-3">
         <div className="flex items-center gap-2">
           <Filter className="size-4 text-emerald-600" />

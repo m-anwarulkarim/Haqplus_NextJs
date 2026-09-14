@@ -255,3 +255,33 @@ model Setting {
 
   @@map("settings")
 }
+
+model Conversation {
+  id            String    @id @default(cuid())
+  sessionId     String    @unique @map("session_id") // Unique ID for anonymous users (e.g. cookie or localstorage based)
+  customerName  String?   @map("customer_name")
+  customerPhone String?   @map("customer_phone")
+  customerEmail String?   @map("customer_email")
+  isClosed      Boolean   @default(false) @map("is_closed")
+  visitCount    Int       @default(1) @map("visit_count")
+  firstVisit    String?   @map("first_visit")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  messages      Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String       @map("conversation_id")
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         Role         @default(CUSTOMER) // CUSTOMER or ADMIN
+  text           String       @db.Text
+  isRead         Boolean      @default(false) @map("is_read")
+  createdAt      DateTime     @default(now())
+
+  @@map("messages")
+}
+

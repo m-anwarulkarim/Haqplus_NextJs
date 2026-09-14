@@ -5,6 +5,7 @@ import { sendMetaCapiEvent } from "@/lib/meta-capi";
 import { saveResilientOrder, getResilientOrders } from "@/lib/orders-store";
 import { prisma } from "@/lib/prisma";
 import { adminMessaging } from "@/lib/firebase-admin";
+import { triggerGsmAutoCall } from "@/lib/gsm-telephony";
 import { z } from "zod";
 
 const createOrderSchema = checkoutSchema.extend({
@@ -287,6 +288,14 @@ export async function POST(req: Request) {
         })
         .catch((err: unknown) => console.warn("Error fetching admin FCM tokens:", err));
     }
+
+    // Trigger Automated GSM Gateway Phone Call asynchronously
+    triggerGsmAutoCall({
+      orderId: createdOrder.orderNumber,
+      customerPhone: createdOrder.phone,
+      customerName: createdOrder.customerName,
+      totalAmount: createdOrder.total,
+    }).catch((gsmErr) => console.warn("Background GSM Auto-Call trigger error:", gsmErr));
 
     return NextResponse.json(
       {

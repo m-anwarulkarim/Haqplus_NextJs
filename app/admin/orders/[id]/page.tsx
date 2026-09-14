@@ -33,13 +33,14 @@ import {
   Ban,
   Check,
   FileText,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InvoiceView } from "@/components/admin/invoice-view";
 import { toast } from "@/components/ui/toast";
-import { TEA_PRODUCTS, TeaProduct } from "@/lib/data/tea-products";
+import { detectThanaFromAddress, BANGLADESH_THANAS_DICT, getThanaOptionsForDistrict, ALL_BANGLADESH_DISTRICTS } from "@/lib/courier/thana-resolver";
 
 export default function AdminOrderDetailPage() {
   const params = useParams<{ id: string }>();
@@ -51,11 +52,41 @@ export default function AdminOrderDetailPage() {
   const [isDispatching, setIsDispatching] = useState(false);
   const [activeTab, setActiveTab] = useState<"edit" | "invoice">("edit");
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [manualThana, setManualThana] = useState<string>("");
+  const [manualDistrict, setManualDistrict] = useState<string>("");
 
   // Real Customer Order History State
   const [customerHistoryOrders, setCustomerHistoryOrders] = useState<any[]>([]);
   const [isBanned, setIsBanned] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+
+  // Steadfast Fraud Check State
+  const [steadfastFraudData, setSteadfastFraudData] = useState<any>(null);
+  const [isCheckingSteadfastFraud, setIsCheckingSteadfastFraud] = useState(false);
+
+  const handleCheckSteadfastFraud = async () => {
+    const targetPhone = phone || order?.phone;
+    if (!targetPhone) {
+      toast.error("Phone number is required");
+      return;
+    }
+    setIsCheckingSteadfastFraud(true);
+    try {
+      const res = await fetch(`/api/courier/steadfast/fraud-check?phone=${encodeURIComponent(targetPhone)}`);
+      const data = await res.json();
+      setSteadfastFraudData(data);
+      if (res.ok && data.success) {
+        toast.success(`Live Steadfast fraud record fetched for ${targetPhone}`);
+      } else {
+        toast.error(data.error || "Failed to fetch Steadfast fraud data");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error checking Steadfast fraud database");
+    } finally {
+      setIsCheckingSteadfastFraud(false);
+    }
+  };
 
   // Editable Order Form States
   const [customerName, setCustomerName] = useState("");
@@ -71,6 +102,25 @@ export default function AdminOrderDetailPage() {
 
   // Product Search State for adding items to order
   const [searchQuery, setSearchQuery] = useState("");
+  const [catalogProducts, setCatalogProducts] = useState<any[]>([]);
+
+  // Load products from API on mount
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const res = await fetch("/api/products?all=true&limit=50");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.products && data.products.length > 0) {
+            setCatalogProducts(data.products);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to load products from API:", err);
+      }
+    }
+    loadProducts();
+  }, []);
 
   const getBengaliStatus = (status: string) => {
     switch (status) {
@@ -187,7 +237,7 @@ export default function AdminOrderDetailPage() {
     setItems((prev) => prev.filter((_, idx) => idx !== index));
   };
 
-  const addProductToOrder = (prod: TeaProduct) => {
+  const addProductToOrder = (prod: any) => {
     setItems((prev) => {
       const existingIdx = prev.findIndex(
         (it) => it.productId === prod.id || it.productName === prod.name
@@ -213,17 +263,16 @@ export default function AdminOrderDetailPage() {
         },
       ];
     });
-    toast.success(`Added ${prod.bengaliName || prod.name} to order`);
+    toast.success(`Added ${prod.name} to order`);
   };
 
   // Filter products for store search drawer
-  const filteredProducts = TEA_PRODUCTS.filter((p) => {
+  const filteredProducts = catalogProducts.filter((p: any) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
       p.name.toLowerCase().includes(q) ||
-      (p.bengaliName && p.bengaliName.toLowerCase().includes(q)) ||
-      p.sku.toLowerCase().includes(q)
+      (p.sku && p.sku.toLowerCase().includes(q))
     );
   });
 
@@ -231,10 +280,14 @@ export default function AdminOrderDetailPage() {
   const handleSaveOrder = async () => {
     setIsSaving(true);
     try {
+      const thanaRes = detectThanaFromAddress(address, manualDistrict || order?.district);
+      const currentDistrict = manualDistrict || thanaRes.district || order?.district || "Dhaka";
+
       const payload = {
         customerName,
         phone,
         address,
+        district: currentDistrict,
         note: note.trim() || null,
         orderStatus,
         paymentStatus,
@@ -439,13 +492,62 @@ export default function AdminOrderDetailPage() {
         </div>
       </div>
 
-      {/* Subheader Title */}
-      <div className="text-xs text-muted-foreground font-mono flex items-center justify-between">
-        <span>Edit Order #{order.id}</span>
+      {/* Subheader Title & Steadfast Live Tracking Banner */}
+      <div className="space-y-2">
+        <div className="text-xs text-muted-foreground font-mono flex items-center justify-between">
+          <span>Edit Order #{order.id}</span>
+          {order.courierTrackingId && (
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
+              <Truck className="size-3" /> Tracking: {order.courierTrackingId} ({order.courierStatus || "Dispatched"})
+            </span>
+          )}
+        </div>
+
+        {/* Steadfast Direct Customer Tracking URL Banner */}
         {order.courierTrackingId && (
-          <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
-            <Truck className="size-3" /> Tracking: {order.courierTrackingId} ({order.courierStatus || "Dispatched"})
-          </span>
+          <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="size-9 rounded-xl bg-purple-600/20 text-purple-600 dark:text-purple-300 flex items-center justify-center shrink-0">
+                <Truck className="size-5" />
+              </div>
+              <div>
+                <span className="font-bold text-foreground block">Steadfast Customer Tracking URL (কাস্টমারকে ট্র্যাকিং লিংক পাঠাতে):</span>
+                <span className="font-mono text-xs text-purple-600 dark:text-purple-300 font-semibold break-all">
+                  https://steadfast.com.bd/tl/{order.courierTrackingId}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const link = `https://steadfast.com.bd/tl/${order.courierTrackingId}`;
+                  navigator.clipboard.writeText(link);
+                  toast.success("Customer tracking link copied to clipboard!");
+                }}
+                className="rounded-xl text-xs gap-1.5 border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 font-bold"
+              >
+                <Copy className="size-3.5" />
+                <span>Copy Link</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                asChild
+                className="rounded-xl text-xs gap-1.5 border-purple-500/30 text-purple-600 dark:text-purple-300 hover:bg-purple-500/10 font-bold"
+              >
+                <a href={`https://steadfast.com.bd/tl/${order.courierTrackingId}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="size-3.5" />
+                  <span>Open Tracking</span>
+                </a>
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 
@@ -531,6 +633,76 @@ export default function AdminOrderDetailPage() {
                     className="w-full bg-background  border border-input dark:border-slate-700/80 rounded-lg px-3 py-2 text-foreground dark:text-slate-100 text-xs font-medium focus:outline-none focus:border-emerald-500 resize-none"
                     placeholder="Enter delivery address"
                   />
+                </div>
+
+                {/* Thana & District Manual / Auto-Detection Section */}
+                <div className="sm:col-span-2 bg-muted/40 p-3 rounded-xl border border-border dark:border-slate-800 space-y-2.5">
+                  {(() => {
+                    const thanaRes = detectThanaFromAddress(address, manualDistrict || order?.district);
+                    const activeDistrict = manualDistrict || thanaRes.district || order?.district || "Dhaka";
+                    const effectiveThana = manualThana || thanaRes.matchedThana;
+
+                    return (
+                      <>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-foreground dark:text-slate-200 flex items-center gap-1.5">
+                            <MapPin className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                            <span>District & Thana Selection (জেলা ও থানা নির্বাচন)</span>
+                          </span>
+                          {effectiveThana ? (
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                              manualThana || manualDistrict
+                                ? "bg-purple-500/15 text-purple-600 border border-purple-500/30"
+                                : thanaRes.confidence === "EXACT"
+                                ? "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"
+                                : "bg-blue-500/15 text-blue-600 border border-blue-500/30"
+                            }`}>
+                              ✓ {activeDistrict} &gt; {effectiveThana} ({(manualThana || manualDistrict) ? "Manual" : thanaRes.confidence})
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-0.5 rounded-md text-xs font-black bg-rose-500/15 text-rose-600 border border-rose-500/40 animate-pulse">
+                              ⚠️ থানা ও জেলা ডিটেক্ট হয়নি (নিচে ম্যানুয়ালি সিলেক্ট করুন)
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {/* 1. District Selector */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground block">District (জেলা) *</label>
+                            <select
+                              value={activeDistrict}
+                              onChange={(e) => {
+                                setManualDistrict(e.target.value);
+                                setManualThana("");
+                              }}
+                              className="w-full bg-background border border-input dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-foreground dark:text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                            >
+                              <option value="">-- জেলা নির্বাচন করুন --</option>
+                              {ALL_BANGLADESH_DISTRICTS.map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* 2. Thana Selector */}
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground block">Thana / Zone (থানা) *</label>
+                            <select
+                              value={manualThana || thanaRes.matchedThana || ""}
+                              onChange={(e) => setManualThana(e.target.value)}
+                              className="w-full bg-background border border-input dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-foreground dark:text-slate-100 focus:outline-none focus:border-emerald-500 cursor-pointer"
+                            >
+                              <option value="">-- {activeDistrict} এর থানা নির্বাচন করুন --</option>
+                              {getThanaOptionsForDistrict(activeDistrict).map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Note Field (Optional / Toggleable) */}
@@ -886,24 +1058,61 @@ export default function AdminOrderDetailPage() {
 
               {/* Couriers breakdown */}
               <div className="space-y-1.5 text-[11px]">
-                <span className="text-muted-foreground font-semibold block text-[10px] uppercase">
-                  By Courier
-                </span>
-                <div className="space-y-1 font-mono">
-                  <div className="flex items-center justify-between bg-muted/40  px-2.5 py-1.5 rounded-md border border-border dark:border-slate-800/60">
-                    <span className="text-foreground dark:text-slate-300 flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" /> SteadFast
-                    </span>
-                    <span className="text-muted-foreground">{realReceivedOrdersCount}/{realTotalOrdersCount} <strong className="text-emerald-600 dark:text-emerald-400 ml-1">{realDeliveryRate}%</strong></span>
-                  </div>
-
-                  <div className="flex items-center justify-between bg-muted/40  px-2.5 py-1.5 rounded-md border border-border dark:border-slate-800/60">
-                    <span className="text-foreground dark:text-slate-300 flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" /> Pathao
-                    </span>
-                    <span className="text-muted-foreground">0/0 <strong className="text-emerald-600 dark:text-emerald-400 ml-1">100%</strong></span>
-                  </div>
+                <div className="flex items-center justify-between text-[10px] uppercase">
+                  <span className="text-muted-foreground font-semibold">Steadfast Live API Record</span>
+                  <button
+                    type="button"
+                    onClick={handleCheckSteadfastFraud}
+                    disabled={isCheckingSteadfastFraud}
+                    className="text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    {isCheckingSteadfastFraud ? <RefreshCw className="size-3 animate-spin" /> : <Search className="size-3" />}
+                    <span>Check Steadfast Fraud</span>
+                  </button>
                 </div>
+
+                {steadfastFraudData ? (
+                  <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/25 space-y-1.5 font-mono text-[11px]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Phone: {steadfastFraudData.phone}</span>
+                      <span className={`px-2 py-0.2 rounded text-[10px] font-extrabold ${
+                        steadfastFraudData.risk_level === "SAFE"
+                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                          : steadfastFraudData.risk_level === "HIGH_RISK"
+                          ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                          : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                      }`}>
+                        {steadfastFraudData.risk_level}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-muted-foreground">
+                      <span>Total: <strong>{steadfastFraudData.total_parcel}</strong></span>
+                      <span>Success: <strong className="text-emerald-600 dark:text-emerald-400">{steadfastFraudData.success_parcel}</strong></span>
+                      <span>Cancel: <strong className="text-rose-600 dark:text-rose-400">{steadfastFraudData.cancelled_parcel}</strong></span>
+                    </div>
+
+                    <div className="w-full bg-muted dark:bg-slate-800 rounded-full h-1.5 overflow-hidden flex">
+                      <div className="bg-emerald-500 h-full" style={{ width: `${Math.min(steadfastFraudData.success_rate, 100)}%` }} />
+                      <div className="bg-rose-500 h-full" style={{ width: `${Math.max(0, 100 - steadfastFraudData.success_rate)}%` }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1 font-mono">
+                    <div className="flex items-center justify-between bg-muted/40 p-2 rounded-md border border-border dark:border-slate-800/60">
+                      <span className="text-foreground dark:text-slate-300 flex items-center gap-1">
+                        <span className="size-1.5 rounded-full bg-emerald-500" /> SteadFast Network
+                      </span>
+                      <button
+                        onClick={handleCheckSteadfastFraud}
+                        disabled={isCheckingSteadfastFraud}
+                        className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
+                      >
+                        {isCheckingSteadfastFraud ? "Checking..." : "Click to Fetch Live"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

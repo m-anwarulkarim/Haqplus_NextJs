@@ -16,6 +16,7 @@ import {
   Sparkles,
   Command,
   X,
+  Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +36,10 @@ const SEARCH_ITEMS = [
   { name: "Courier Settings", href: "/admin/settings/courier", category: "Settings", icon: Settings },
 ];
 
+import useSWR from "swr";
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
 export function AdminCommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -51,6 +56,14 @@ export function AdminCommandPalette() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const { data: dynamicSearch, isValidating } = useSWR(
+    query.length >= 3 ? `/api/admin/global-search?q=${encodeURIComponent(query)}` : null,
+    fetcher,
+    { keepPreviousData: true }
+  );
+
+  const dynamicResults = dynamicSearch?.results || [];
 
   const filtered = SEARCH_ITEMS.filter((item) =>
     item.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -104,35 +117,84 @@ export function AdminCommandPalette() {
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto p-2 space-y-1 bg-card">
-            {filtered.length === 0 ? (
+          <div className="max-h-80 overflow-y-auto p-2 space-y-1 bg-card relative">
+            {/* Loading Indicator */}
+            {isValidating && query.length >= 3 && (
+              <div className="absolute top-2 right-4 z-10 flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/80 backdrop-blur-sm px-2 py-1 rounded-full border border-border/50">
+                <Loader2 className="size-3 animate-spin" />
+                Searching DB...
+              </div>
+            )}
+
+            {filtered.length === 0 && dynamicResults.length === 0 ? (
               <div className="py-8 text-center text-xs text-muted-foreground">
-                No matching admin pages found for &quot;{query}&quot;
+                No matching results found for &quot;{query}&quot;
               </div>
             ) : (
-              filtered.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.href}
-                    onClick={() => handleSelect(item.href)}
-                    className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/70 text-left transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <Icon className="size-4" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-foreground">{item.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{item.href}</p>
-                      </div>
+              <>
+                {/* Static Navigation Items */}
+                {filtered.length > 0 && (
+                  <div className="space-y-1">
+                    {filtered.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.href}
+                          onClick={() => handleSelect(item.href)}
+                          className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-muted/70 text-left transition-colors cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                              <Icon className="size-4" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold text-foreground">{item.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{item.href}</p>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground">
+                            {item.category}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Divider if both exist */}
+                {filtered.length > 0 && dynamicResults.length > 0 && (
+                  <div className="h-px bg-border/50 my-2" />
+                )}
+
+                {/* Dynamic DB Search Results */}
+                {dynamicResults.length > 0 && (
+                  <div className="space-y-1">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      Orders Found
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-secondary text-secondary-foreground">
-                      {item.category}
-                    </span>
-                  </button>
-                );
-              })
+                    {dynamicResults.map((item: any) => (
+                      <button
+                        key={item.href}
+                        onClick={() => handleSelect(item.href)}
+                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-500/10 hover:border-emerald-500/20 text-left transition-all cursor-pointer border border-transparent group"
+                      >
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                            <ShoppingCart className="size-4" />
+                          </div>
+                          <div className="truncate pr-4">
+                            <p className="text-xs font-semibold text-foreground truncate">{item.name}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{item.description}</p>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 shrink-0">
+                          {item.category}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 

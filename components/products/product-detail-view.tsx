@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Star,
@@ -36,6 +36,20 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     product.variants && product.variants.length > 0 ? product.variants[0] : null
   );
   const [quantity, setQuantity] = useState(1);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Show sticky bar after scrolling past the main add-to-cart button (approx 600px)
+      if (window.scrollY > 600) {
+        setShowStickyBar(true);
+      } else {
+        setShowStickyBar(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Active price depends on selected variant or product discount
   const activePrice = selectedVariant ? selectedVariant.price : product.price;
@@ -320,6 +334,66 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
           rating={product.rating ?? 5.0}
           reviewCount={product.reviewCount ?? 0}
         />
+      </div>
+
+      {/* Sticky Add-To-Cart Bar */}
+      <div
+        className={`fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl transition-transform duration-300 sm:px-6 md:hidden ${
+          showStickyBar ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="container mx-auto flex items-center justify-between gap-4">
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-foreground line-clamp-1">{product.name}</span>
+            <span className="text-sm font-bold text-emerald-600">৳{activePrice}</span>
+          </div>
+          <Button
+            onClick={handleAddToCart}
+            disabled={!isAvailable}
+            className="rounded-full bg-emerald-600 px-6 font-bold text-white shadow-lg shadow-emerald-600/30 hover:bg-emerald-700"
+          >
+            <ShoppingBag className="mr-2 size-4" />
+            Add to Cart
+          </Button>
+        </div>
+      </div>
+      
+      {/* Desktop Sticky Add-To-Cart Bar */}
+      <div
+        className={`hidden md:flex fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background/80 px-6 py-3 backdrop-blur-xl transition-transform duration-300 ${
+          showStickyBar ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
+        <div className="container mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative size-12 overflow-hidden rounded-lg">
+              <img src={product.images[0] || "/placeholder.png"} alt={product.name} className="object-cover w-full h-full" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-base font-bold text-foreground line-clamp-1">{product.name}</span>
+              <span className="text-sm font-bold text-emerald-600">৳{activePrice}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+             <Button
+                variant="outline"
+                className="rounded-full border-emerald-600/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+                onClick={handleAddToCart}
+                disabled={!isAvailable}
+              >
+                <ShoppingBag className="mr-2 size-4" />
+                কার্টে যোগ করুন
+              </Button>
+              <Button
+                className="rounded-full bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 font-bold px-8"
+                onClick={handleBuyNow}
+                disabled={!isAvailable}
+              >
+                <Zap className="mr-2 size-4" />
+                সরাসরি কিনুন
+              </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

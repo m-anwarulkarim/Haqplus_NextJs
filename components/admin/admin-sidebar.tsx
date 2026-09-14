@@ -18,6 +18,9 @@ import {
   PackageCheck,
   PlusCircle,
   X,
+  MessageSquare,
+  Truck,
+  BarChart3,
 } from "lucide-react";
 import { AdminSidebarSettings } from "./admin-sidebar-settings";
 import { useAdminSidebar } from "./admin-sidebar-context";
@@ -25,12 +28,12 @@ import { useAdminSidebar } from "./admin-sidebar-context";
 export function AdminSidebar() {
   const pathname = usePathname();
   const { isCollapsed, toggleSidebar, closeMobileSidebar } = useAdminSidebar();
-  const [ordersSubmenuOpen, setOrdersSubmenuOpen] = useState(
-    pathname.startsWith("/admin/orders") || pathname.startsWith("/admin/courier")
-  );
+  
+  const isOverviewActive = pathname === "/admin" || pathname === "/admin/courier";
+  const [overviewSubmenuOpen, setOverviewSubmenuOpen] = useState(isOverviewActive);
 
-  const isOrdersActive =
-    pathname.startsWith("/admin/orders") || pathname.startsWith("/admin/courier");
+  const isOrdersActive = pathname.startsWith("/admin/orders");
+  const [ordersSubmenuOpen, setOrdersSubmenuOpen] = useState(isOrdersActive);
 
   return (
     <>
@@ -86,20 +89,58 @@ export function AdminSidebar() {
 
           {/* Navigation List */}
           <nav className="space-y-1">
-            {/* Overview */}
-            <Link
-              href="/admin"
-              onClick={closeMobileSidebar}
-              title="Overview"
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                pathname === "/admin"
-                  ? "bg-primary text-primary-foreground shadow-xs font-bold"
-                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-              }`}
-            >
-              <LayoutDashboard className="size-4 shrink-0" />
-              <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Overview</span>
-            </Link>
+            {/* 1. OVERVIEW MAIN MENU WITH SUBMENUS */}
+            <div className="space-y-0.5">
+              <button
+                onClick={() => setOverviewSubmenuOpen(!overviewSubmenuOpen)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                  isOverviewActive
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutDashboard className="size-4 shrink-0" />
+                  <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Overview</span>
+                </div>
+                <ChevronDown
+                  className={`size-3.5 transition-transform duration-200 ${
+                    overviewSubmenuOpen ? "rotate-180" : ""
+                  } ${isCollapsed ? "hidden md:hidden" : "block"}`}
+                />
+              </button>
+
+              {/* Submenus under Overview */}
+              {overviewSubmenuOpen && (
+                <div className={`pl-4 pr-1 py-1 space-y-1 border-l-2 border-emerald-500/30 ml-4 animate-in slide-in-from-top-1 duration-150 ${isCollapsed ? "md:hidden" : "block"}`}>
+                  <Link
+                    href="/admin"
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      pathname === "/admin"
+                        ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    }`}
+                  >
+                    <LayoutDashboard className="size-3.5 shrink-0" />
+                    <span className="truncate">Store Overview</span>
+                  </Link>
+
+                  <Link
+                    href="/admin/courier"
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      pathname === "/admin/courier"
+                        ? "bg-primary text-primary-foreground font-bold shadow-xs"
+                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Truck className="size-3.5 shrink-0" />
+                    <span className="truncate">Courier Analytics</span>
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Products */}
             <Link
@@ -131,7 +172,7 @@ export function AdminSidebar() {
               <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Categories</span>
             </Link>
 
-            {/* ORDERS MAIN MENU WITH 2 SUBMENUS */}
+            {/* ORDERS MAIN MENU WITH 3 SUBMENUS */}
             <div className="space-y-0.5">
               <button
                 onClick={() => setOrdersSubmenuOpen(!ordersSubmenuOpen)}
@@ -155,7 +196,7 @@ export function AdminSidebar() {
               {/* Submenus */}
               {ordersSubmenuOpen && (
                 <div className={`pl-4 pr-1 py-1 space-y-1 border-l-2 border-emerald-500/30 ml-4 animate-in slide-in-from-top-1 duration-150 ${isCollapsed ? "md:hidden" : "block"}`}>
-    {/* Submenu 1: New Order / Create Order */}
+                  {/* Submenu 1: New Order */}
                   <Link
                     href="/admin/orders/new"
                     onClick={closeMobileSidebar}
@@ -166,10 +207,10 @@ export function AdminSidebar() {
                     }`}
                   >
                     <PlusCircle className="size-3.5 shrink-0" />
-                    <span className="truncate">1. New Order </span>
+                    <span className="truncate">1. New Order</span>
                   </Link>
 
-                  {/* Submenu 2: Pre-Confirm Order List*/}
+                  {/* Submenu 2: Pre-Confirm Order List */}
                   <Link
                     href="/admin/orders"
                     onClick={closeMobileSidebar}
@@ -180,27 +221,40 @@ export function AdminSidebar() {
                     }`}
                   >
                     <ListOrdered className="size-3.5 shrink-0" />
-                    <span className="truncate">2. Order List </span>
+                    <span className="truncate">2. Order List</span>
                   </Link>
 
-                  {/* Submenu 3: Courier Real Updates / Post-Confirm (Image 2) */}
+                  {/* Submenu 3: Confirmed / Post-Confirm Orders (Matching User Screenshot) */}
                   <Link
-                    href="/admin/courier"
+                    href="/admin/orders/conform"
                     onClick={closeMobileSidebar}
                     className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                      pathname.startsWith("/admin/courier")
+                      pathname.startsWith("/admin/orders/conform")
                         ? "bg-primary text-primary-foreground font-bold shadow-xs"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                     }`}
                   >
                     <PackageCheck className="size-3.5 shrink-0" />
-                    <span className="truncate">3. Courier Real Updates </span>
+                    <span className="truncate">3. Confirmed Orders</span>
                   </Link>
-
-              
                 </div>
               )}
             </div>
+
+            {/* Live Chat */}
+            <Link
+              href="/admin/chat"
+              onClick={closeMobileSidebar}
+              title="Live Chat"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                pathname.startsWith("/admin/chat")
+                  ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              }`}
+            >
+              <MessageSquare className="size-4 shrink-0" />
+              <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Live Chat</span>
+            </Link>
 
             {/* Landing Pages */}
             <Link

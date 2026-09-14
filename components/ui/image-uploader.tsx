@@ -34,27 +34,49 @@ export function ImageUploader({
     onChange(value.filter((_, idx) => idx !== indexToRemove));
   };
 
+  const convertToWebP = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            return reject(new Error("Failed to get canvas context"));
+          }
+          ctx.drawImage(img, 0, 0);
+          const webpDataUrl = canvas.toDataURL("image/webp", 0.85); // 85% quality
+          resolve(webpDataUrl);
+        };
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
     try {
-      // In development / local testing, convert uploaded files to data URLs or use uploaded URLs
       const newUrls: string[] = [];
       for (let i = 0; i < files.length; i++) {
         if (value.length + newUrls.length >= maxFiles) break;
         const file = files[i];
-        const reader = new FileReader();
-        const url = await new Promise<string>((resolve) => {
-          reader.onload = (event) => resolve(event.target?.result as string);
-          reader.readAsDataURL(file);
-        });
-        newUrls.push(url);
+        
+        // Convert the image to WebP to reduce size significantly
+        const webpDataUrl = await convertToWebP(file);
+        newUrls.push(webpDataUrl);
       }
       onChange([...value, ...newUrls]);
     } catch (err) {
-      console.error("Image upload error:", err);
+      console.error("Image upload/conversion error:", err);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
