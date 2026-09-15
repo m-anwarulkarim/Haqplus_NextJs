@@ -1218,8 +1218,9 @@ export default function AdminOrderDetailPage() {
               </div>
 
               <div className="space-y-1 text-xs text-foreground dark:text-slate-300 pt-2 border-t border-border dark:border-slate-800 font-mono text-[11px]">
-                <p><span className="text-muted-foreground">Phone:</span> {phone}</p>
-                <p className="line-clamp-2"><span className="text-muted-foreground">Address:</span> {address}</p>
+                <p><span className="text-muted-foreground font-sans">Phone:</span> {phone || order?.phone}</p>
+                <p className="break-all"><span className="text-muted-foreground font-sans">Email:</span> {email || order?.email || "N/A"}</p>
+                <p className="line-clamp-2"><span className="text-muted-foreground font-sans">Address:</span> {address || order?.address}</p>
               </div>
             </div>
 
