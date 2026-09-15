@@ -88,4 +88,14 @@ export const DEFAULT_EMAIL_TEMPLATES = {
   </div>
 </div>
 `,
+  ADMIN_ALERT_SUBJECT: "🚨 নতুন অর্ডার নোটিফিকেশন - #{order_number} (৳{total_amount})",
+  ADMIN_ALERT_BODY: `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 2px solid #8b5cf6;">
+  <h2 style="color: #7c3aed; margin-top: 0;">🚨 নতুন অর্ডার অ্যালার্ট (Admin Alert)</h2>
+  <p><strong>অর্ডার #:</strong> #{order_number}</p>
+  <p><strong>কাস্টমার:</strong> {customer_name} ({phone})</p>
+  <p><strong>ঠিকানা:</strong> {address}, {district}</p>
+  <p><strong>সর্বমোট মূল্য:</strong> ৳{total_amount}</p>
+</div>
+`,
 };
