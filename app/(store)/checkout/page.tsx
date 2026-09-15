@@ -373,16 +373,9 @@ export default function CheckoutPage() {
                   {/* Optional Email Input */}
                   {showEmail && (
                     <div className="pt-1 animate-in fade-in-50 duration-200 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="email" className="text-xs font-medium text-slate-700 block">
-                          ইমেইল এড্রেস (ইনভয়েস ও নোটিফিকেশন পেতে)
-                        </Label>
-                        {session?.user?.email && (
-                          <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80">
-                            🔒 অ্যাকাউন্টের ইমেইল (পরিবর্তনযোগ্য নয়)
-                          </span>
-                        )}
-                      </div>
+                      <Label htmlFor="email" className="text-xs font-medium text-slate-700 block">
+                        ইমেইল এড্রেস (ঐচ্ছিক)
+                      </Label>
                       <div className="relative flex items-center">
                         <Mail className="absolute left-3.5 size-4 text-slate-400 pointer-events-none" />
                         <Input
@@ -392,7 +385,7 @@ export default function CheckoutPage() {
                           placeholder="আপনার ইমেইল বা জিমেইল (যেমন: example@gmail.com)"
                           className={`h-11 pl-10 pr-4 rounded-xl text-sm transition-all ${
                             session?.user?.email
-                              ? "bg-slate-100/90 text-slate-600 font-semibold cursor-not-allowed border-slate-300"
+                              ? "bg-slate-100/90 text-slate-600 font-medium cursor-not-allowed border-slate-300"
                               : "bg-[#f8f9fa] border border-slate-200/90"
                           }`}
                           {...register("email")}
