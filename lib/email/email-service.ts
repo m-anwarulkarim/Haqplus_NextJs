@@ -5,6 +5,8 @@ import { DEFAULT_EMAIL_TEMPLATES } from "./email-templates-default";
 
 export { DEFAULT_EMAIL_TEMPLATES };
 
+const DEFAULT_SHOP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://haqplus-next-js-h7fj.vercel.app";
+
 // Function to read settings from .data/settings.json
 function getSettings() {
   try {
@@ -102,6 +104,7 @@ export async function sendOrderConfirmationEmail(order: any) {
     payment_method: order.paymentMethod || "COD",
     address: order.address || "",
     district: order.district || "",
+    shop_url: DEFAULT_SHOP_URL,
   };
 
   const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
@@ -116,8 +119,13 @@ export async function sendOrderConfirmationEmail(order: any) {
   <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
     ${plainTextBody}
   </div>
+  <div style="margin-top: 24px; text-align: center;">
+    <a href="${DEFAULT_SHOP_URL}" target="_blank" style="display: inline-block; background-color: #0f6848; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+      🌐 ওয়েবসাইট ভিজিট করুন (${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')})
+    </a>
+  </div>
   <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
-    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. | <a href="${DEFAULT_SHOP_URL}" target="_blank" style="color: #0f6848; text-decoration: underline;">${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')}</a>
   </div>
 </div>
   `;
@@ -168,6 +176,7 @@ export async function sendOrderShippedEmail(order: any, courierName = "Steadfast
     courier_name: courierName,
     tracking_code: code,
     tracking_link: trackingUrl,
+    shop_url: DEFAULT_SHOP_URL,
   };
 
   const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
@@ -182,8 +191,13 @@ export async function sendOrderShippedEmail(order: any, courierName = "Steadfast
   <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
     ${plainTextBody}
   </div>
+  <div style="margin-top: 24px; text-align: center;">
+    <a href="${DEFAULT_SHOP_URL}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+      🌐 ওয়েবসাইট ভিজিট করুন (${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')})
+    </a>
+  </div>
   <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
-    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. | <a href="${DEFAULT_SHOP_URL}" target="_blank" style="color: #2563eb; text-decoration: underline;">${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')}</a>
   </div>
 </div>
   `;
@@ -234,6 +248,7 @@ export async function sendOrderStatusEmail(order: any, status: string) {
     courier_name: order.courierName || "Steadfast Courier",
     tracking_code: order.courierTrackingId || "N/A",
     tracking_link: order.courierTrackingId ? `https://steadfast.com.bd/tl/${order.courierTrackingId}` : "#",
+    shop_url: DEFAULT_SHOP_URL,
   };
 
   const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
@@ -248,8 +263,13 @@ export async function sendOrderStatusEmail(order: any, status: string) {
   <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
     ${plainTextBody}
   </div>
+  <div style="margin-top: 24px; text-align: center;">
+    <a href="${DEFAULT_SHOP_URL}" target="_blank" style="display: inline-block; background-color: #0f6848; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px;">
+      🌐 ওয়েবসাইট ভিজিট করুন (${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')})
+    </a>
+  </div>
   <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
-    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. | <a href="${DEFAULT_SHOP_URL}" target="_blank" style="color: #0f6848; text-decoration: underline;">${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')}</a>
   </div>
 </div>
   `;

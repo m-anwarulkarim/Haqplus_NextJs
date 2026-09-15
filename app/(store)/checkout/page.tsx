@@ -9,15 +9,12 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ShieldCheck,
-  Truck,
-  CreditCard,
+
   Banknote,
   ArrowRight,
   ShoppingBag,
   Loader2,
   CheckCircle2,
-  CheckSquare,
-  Square,
   FileText,
   User,
   Phone,

@@ -148,6 +148,7 @@ const PLACEHOLDERS = [
   { tag: "{courier_name}", desc: "কুরিয়ার নাম" },
   { tag: "{tracking_code}", desc: "ট্র্যাকিং আইডি" },
   { tag: "{tracking_link}", desc: "ট্র্যাকিং লিঙ্ক" },
+  { tag: "{shop_url}", desc: "ওয়েবসাইট লিঙ্ক" },
 ];
 
 export default function EmailTemplatesPage() {

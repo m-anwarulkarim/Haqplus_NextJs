@@ -1,5 +1,59 @@
 [
   {
+    "id": "ord_cuid_1789475731420_l84zb",
+    "orderNumber": "ORD-731420-3111",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "পদ্মডাঙ্গা, কোদালিয়া, মোল্লাহাট,\nবাগেরহাট",
+    "subtotal": 520,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 520,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_33liaj",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "15/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1789475731420_0",
+        "orderId": "ord_cuid_1789475731420_l84zb",
+        "productId": "cmtsye862000hvf1onqhke8ft",
+        "variantId": null,
+        "productName": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+        "quantity": 1,
+        "price": 520,
+        "product": {
+          "id": "cmtsye862000hvf1onqhke8ft",
+          "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+          "images": [
+            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye862000hvf1onqhke8ft"
+        }
+      }
+    ],
+    "createdAt": "2026-09-15T12:35:31.420Z",
+    "updatedAt": "2026-09-15T12:35:31.420Z"
+  },
+  {
     "id": "ord_cuid_1789475407072_xf0r3",
     "orderNumber": "ORD-407072-4608",
     "userId": "usr-anwarul-admin",
