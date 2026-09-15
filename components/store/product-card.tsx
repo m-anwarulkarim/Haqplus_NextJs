@@ -55,7 +55,7 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className={`group relative flex flex-col overflow-hidden rounded-[20px] bg-white transition-all duration-300 hover:shadow-xl sm:rounded-[24px] ${isSelected ? 'border-2 border-emerald-600 shadow-md' : 'border border-border/60 hover:border-emerald-600/50'}`}>
+    <Card className={`group relative flex flex-col overflow-hidden rounded-[20px] bg-card text-card-foreground dark:bg-slate-900/90 dark:border-slate-800 transition-all duration-300 hover:shadow-xl sm:rounded-[24px] ${isSelected ? 'border-2 border-emerald-600 shadow-md' : 'border border-border/60 hover:border-emerald-600/50'}`}>
       
       {/* Selected Badge (Top Left inside image) */}
       {isSelected && (
@@ -80,14 +80,14 @@ export function ProductCard({ product }: ProductCardProps) {
           e.stopPropagation();
           toast.success(`${product.name} উইশলিস্টে সেভ হয়েছে!`);
         }}
-        className="absolute top-3 right-3 z-20 flex size-8 items-center justify-center rounded-full bg-white/90 text-muted-foreground opacity-100 shadow-sm backdrop-blur-sm transition-all hover:bg-rose-50 hover:text-rose-500 sm:size-9 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
+        className="absolute top-3 right-3 z-20 flex size-8 items-center justify-center rounded-full bg-background/90 text-foreground dark:bg-slate-800/90 dark:text-slate-200 opacity-100 shadow-sm backdrop-blur-sm transition-all hover:bg-rose-50 dark:hover:bg-rose-950/60 hover:text-rose-500 sm:size-9 sm:opacity-0 sm:group-hover:opacity-100 cursor-pointer"
         aria-label="Add to wishlist"
       >
         <Heart className="size-4 sm:size-4.5" />
       </button>
 
       {/* Product Image Area */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#F8F9FA]">
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted/40 dark:bg-slate-800/60">
         <Link
           href={`/products/${product.slug}`}
           className="relative block size-full cursor-pointer"
@@ -99,80 +99,80 @@ export function ProductCard({ product }: ProductCardProps) {
             className="object-cover transition-transform duration-700 group-hover:scale-110"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/5" />
+          <div className="absolute inset-0 bg-black/0 transition-colors duration-300 group-hover:bg-black/10 dark:group-hover:bg-black/30" />
         </Link>
       </div>
 
       {/* Content Area */}
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
+      <div className="flex flex-1 flex-col p-3.5 sm:p-5">
         <CardContent className="flex flex-1 flex-col items-center p-0 text-center">
           
           <Link href={`/products/${product.slug}`} className="cursor-pointer w-full">
-            <h3 className="mb-2 line-clamp-1 text-[15px] sm:text-[17px] font-extrabold text-[#0D4424] transition-colors group-hover:text-emerald-700">
+            <h3 className="mb-1.5 sm:mb-2 line-clamp-1 text-[14px] sm:text-[17px] font-extrabold text-foreground dark:text-emerald-300 transition-colors group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
               {product.name}
             </h3>
           </Link>
 
-          <p className="mb-4 text-[11px] sm:text-[12px] leading-relaxed text-muted-foreground/90 line-clamp-2 px-1">
+          <p className="mb-3 sm:mb-4 text-[11px] sm:text-[12px] leading-relaxed text-muted-foreground line-clamp-2 px-1 font-medium">
             {product.description}
           </p>
 
           <div className="mt-auto flex flex-col items-center justify-center gap-1">
             <div className="flex items-center justify-center gap-2">
               {product.originalPrice && (
-                <span className="font-mono text-[12px] sm:text-[13px] text-muted-foreground/70 line-through">
+                <span className="font-mono text-[11px] sm:text-[13px] text-muted-foreground/70 line-through">
                   ৳{product.originalPrice.toFixed(0)}
                 </span>
               )}
-              <span className="font-mono text-[18px] sm:text-[22px] font-black text-emerald-600">
+              <span className="font-mono text-[17px] sm:text-[22px] font-black text-emerald-600 dark:text-emerald-400">
                 ৳{product.price.toFixed(0)}
               </span>
             </div>
             
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-muted-foreground/80 font-medium">
-              <span className="text-emerald-600/40">◟</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-muted-foreground font-medium">
+              <span className="text-emerald-500/60">•</span>
               <span>{product.category || "১ প্যাক"}</span>
             </div>
           </div>
         </CardContent>
 
         {/* Action Area */}
-        <CardFooter className="mt-5 flex flex-col p-0">
+        <CardFooter className="mt-4 sm:mt-5 flex flex-col p-0">
           {!isSelected ? (
             <Button
               onClick={handleAddToCart}
               variant="outline"
-              className="w-full h-10 sm:h-11 rounded-[12px] sm:rounded-[14px] border-emerald-600/30 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all gap-2 bg-white"
+              className="w-full h-9 sm:h-11 rounded-[12px] sm:rounded-[14px] border-emerald-600/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-800 dark:hover:text-emerald-200 transition-all gap-1.5 sm:gap-2 bg-background dark:bg-slate-800/90 dark:border-slate-700"
             >
-              <ShoppingBag className="size-4" />
-              <span className="text-[13px] sm:text-[14px] font-bold tracking-wide">নির্বাচন করুন</span>
+              <ShoppingBag className="size-3.5 sm:size-4" />
+              <span className="text-[12px] sm:text-[14px] font-bold tracking-wide">নির্বাচন করুন</span>
             </Button>
           ) : (
             <div className="flex w-full flex-col gap-2">
               <Button
-                className="w-full h-10 sm:h-11 rounded-[12px] sm:rounded-[14px] bg-emerald-600 text-white hover:bg-emerald-700 transition-all gap-2 cursor-default pointer-events-none"
+                className="w-full h-9 sm:h-11 rounded-[12px] sm:rounded-[14px] bg-emerald-600 text-white hover:bg-emerald-700 transition-all gap-2 cursor-default pointer-events-none"
               >
                 <Check className="size-4" />
-                <span className="text-[13px] sm:text-[14px] font-bold tracking-wide">নির্বাচিত</span>
+                <span className="text-[12px] sm:text-[14px] font-bold tracking-wide">নির্বাচিত</span>
               </Button>
               
-              <div className="flex items-center justify-between rounded-[12px] sm:rounded-[14px] border border-emerald-200 bg-emerald-50/50 p-1">
+              <div className="flex items-center justify-between rounded-[12px] sm:rounded-[14px] border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-950/40 p-1">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleDecrement}
-                  className="size-8 rounded-[10px] text-emerald-700 hover:bg-white hover:text-emerald-800 hover:shadow-sm transition-all"
+                  className="size-7 sm:size-8 rounded-[10px] text-emerald-700 dark:text-emerald-300 hover:bg-background hover:text-emerald-800 dark:hover:text-white hover:shadow-sm transition-all"
                 >
                   <Minus className="size-3.5" />
                 </Button>
-                <span className="font-mono text-[14px] font-bold text-emerald-800 w-8 text-center">
+                <span className="font-mono text-[13px] sm:text-[14px] font-bold text-emerald-800 dark:text-emerald-200 w-8 text-center">
                   {quantity}
                 </span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleIncrement}
-                  className="size-8 rounded-[10px] text-emerald-700 hover:bg-white hover:text-emerald-800 hover:shadow-sm transition-all"
+                  className="size-7 sm:size-8 rounded-[10px] text-emerald-700 dark:text-emerald-300 hover:bg-background hover:text-emerald-800 dark:hover:text-white hover:shadow-sm transition-all"
                 >
                   <Plus className="size-3.5" />
                 </Button>

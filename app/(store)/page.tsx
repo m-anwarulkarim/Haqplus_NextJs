@@ -80,42 +80,43 @@ export default async function StorefrontHomePage() {
   }
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-20">
+    <div className="space-y-10 sm:space-y-16 pb-16 sm:pb-20">
       {/* Image Slider Hero Section */}
-      <section className="container mx-auto px-4 sm:px-6 pt-4 sm:pt-6">
+      <section className="container mx-auto px-3 sm:px-6 pt-2 sm:pt-6">
         <HeroSlider />
       </section>
 
       {/* Featured Tea Categories Grid */}
       <section className="container mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
+        <div className="flex flex-row items-center justify-between gap-3 mb-6 sm:mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
               <Sparkles className="size-3.5" />
               <span>চায়ের ক্যাটাগরি</span>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               আপনার পছন্দের চা বেছে নিন
             </h2>
           </div>
-          <Button variant="ghost" asChild className="group text-sm font-semibold text-emerald-600 hover:text-emerald-700">
+          <Button variant="ghost" size="sm" asChild className="group text-xs sm:text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 shrink-0">
             <Link href="/shop">
-              <span>সবগুলো ক্যাটাগরি দেখুন</span>
-              <ArrowRight className="size-4 ml-1 transition-transform group-hover:translate-x-1" />
+              <span className="hidden sm:inline">সবগুলো ক্যাটাগরি দেখুন</span>
+              <span className="sm:hidden">সবগুলো</span>
+              <ArrowRight className="size-3.5 sm:size-4 ml-1 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
         </div>
 
-        {/* Category Row: 1 line on PC (5 items) and 1 line on Mobile (3 visible items) */}
-        <div className="flex overflow-x-auto no-scrollbar gap-2.5 sm:gap-4 pb-2 lg:grid lg:grid-cols-5 snap-x snap-mandatory">
+        {/* Category Row: 1 line on PC (5 items) and scrollable on Mobile */}
+        <div className="flex overflow-x-auto no-scrollbar gap-3 sm:gap-4 pb-2 lg:grid lg:grid-cols-5 snap-x snap-mandatory">
           {categories.map((category) => (
             <Link
               key={category.id}
               href={`/category/${category.slug}`}
-              className="group flex flex-col items-center text-center rounded-2xl border border-border/80 bg-card p-2 sm:p-3 shadow-2xs hover:shadow-md hover:border-emerald-600/50 hover:-translate-y-1 transition-all duration-300 w-[calc((100%-20px)/3)] min-w-[95px] lg:w-auto shrink-0 snap-start cursor-pointer"
+              className="group flex flex-col items-center text-center rounded-2xl border border-border/80 dark:border-slate-800 bg-card dark:bg-slate-900/90 p-2.5 sm:p-3.5 shadow-2xs hover:shadow-md hover:border-emerald-600/50 dark:hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-300 w-[calc((100%-24px)/3)] min-w-[100px] sm:min-w-[130px] lg:w-auto shrink-0 snap-start cursor-pointer"
             >
               {/* Category Image */}
-              <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden bg-muted/40 mb-2">
+              <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl overflow-hidden bg-muted/40 dark:bg-slate-800 mb-2">
                 <Image
                   src={category.image}
                   alt={category.name}
@@ -123,12 +124,12 @@ export default async function StorefrontHomePage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 640px) 33vw, 20vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-30 group-hover:opacity-100 transition-opacity" />
               </div>
 
               {/* Title & Item Count */}
               <div className="w-full">
-                <h3 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-emerald-600 transition-colors line-clamp-1 leading-snug">
+                <h3 className="text-xs sm:text-sm font-bold text-foreground dark:text-slate-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1 leading-snug">
                   {category.name}
                 </h3>
                 <span className="text-[10px] sm:text-[11px] text-muted-foreground line-clamp-1 block mt-0.5 font-medium">
@@ -142,18 +143,18 @@ export default async function StorefrontHomePage() {
 
       {/* Trending Tea Products Grid */}
       <section className="container mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
+        <div className="flex flex-row items-center justify-between gap-3 mb-6 sm:mb-8">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-1">
               <Leaf className="size-3.5" />
               <span>জনপ্রিয় কালেকশন</span>
             </div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h2 className="text-xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               Best Selling Products
             </h2>
           </div>
-          <Button variant="outline" asChild className="rounded-xl">
-            <Link href="/shop">সবগুলো চা দেখুন ({products.length}টি)</Link>
+          <Button variant="outline" size="sm" asChild className="rounded-xl border-border/80 dark:border-slate-700 text-xs sm:text-sm font-semibold shrink-0">
+            <Link href="/shop">সবগুলো চা ({products.length}টি)</Link>
           </Button>
         </div>
 
@@ -166,42 +167,42 @@ export default async function StorefrontHomePage() {
 
       {/* Trust & Quality Banner */}
       <section className="container mx-auto px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-gradient-to-br from-emerald-900/10 via-emerald-800/5 to-teal-900/10 dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-teal-950/30 p-8 lg:p-12 backdrop-blur-xl shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border border-border/80 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-900/10 via-emerald-800/5 to-teal-900/10 dark:from-slate-900 dark:via-emerald-950/40 dark:to-teal-950/30 p-6 sm:p-8 lg:p-12 backdrop-blur-xl shadow-2xl">
           {/* Decorative Glow Elements */}
-          <div className="absolute -top-24 -right-24 size-64 rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-teal-500/10 blur-3xl" />
+          <div className="absolute -top-24 -right-24 size-64 rounded-full bg-emerald-500/10 dark:bg-emerald-500/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-teal-500/10 dark:bg-teal-500/15 blur-3xl pointer-events-none" />
           
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-            <div className="group flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600/10 text-emerald-600 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
-                <Truck className="size-7" />
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center md:text-left">
+            <div className="group flex flex-col md:flex-row items-center md:items-start gap-3 sm:gap-4">
+              <div className="flex size-12 sm:size-14 items-center justify-center rounded-2xl bg-emerald-600/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                <Truck className="size-6 sm:size-7" />
               </div>
-              <div className="space-y-1.5">
-                <h4 className="text-base font-extrabold text-foreground tracking-tight">দ্রুততম হোম ডেলিভারি</h4>
+              <div className="space-y-1">
+                <h4 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">দ্রুততম হোম ডেলিভারি</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                   Steadfast কুরিয়ার সার্ভিসের মাধ্যমে ঢাকা ও সমগ্র বাংলাদেশে ২৪ থেকে ৪৮ ঘণ্টার মধ্যে পৌঁছে দেওয়া হয়।
                 </p>
               </div>
             </div>
 
-            <div className="group flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600/10 text-emerald-600 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
-                <ShieldCheck className="size-7" />
+            <div className="group flex flex-col md:flex-row items-center md:items-start gap-3 sm:gap-4">
+              <div className="flex size-12 sm:size-14 items-center justify-center rounded-2xl bg-emerald-600/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                <ShieldCheck className="size-6 sm:size-7" />
               </div>
-              <div className="space-y-1.5">
-                <h4 className="text-base font-extrabold text-foreground tracking-tight">শতভাগ খাঁটি চায়ের গ্যারান্টি</h4>
+              <div className="space-y-1">
+                <h4 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">শতভাগ খাঁটি চায়ের গ্যারান্টি</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                   কোনো ক্ষতিকর রাসায়নিক বা ভেজাল ছাড়া সরাসরি বাগান থেকে রি-প্যাক করা খাঁটি চা পাতা।
                 </p>
               </div>
             </div>
 
-            <div className="group flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600/10 text-emerald-600 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
-                <RotateCcw className="size-7" />
+            <div className="group flex flex-col md:flex-row items-center md:items-start gap-3 sm:gap-4">
+              <div className="flex size-12 sm:size-14 items-center justify-center rounded-2xl bg-emerald-600/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0 border border-emerald-600/20 shadow-inner transition-transform duration-500 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white">
+                <RotateCcw className="size-6 sm:size-7" />
               </div>
-              <div className="space-y-1.5">
-                <h4 className="text-base font-extrabold text-foreground tracking-tight">ক্যাশ অন ডেলিভারি</h4>
+              <div className="space-y-1">
+                <h4 className="text-sm sm:text-base font-extrabold text-foreground tracking-tight">ক্যাশ অন ডেলিভারি</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                   আগে কোনো অগ্রিম টাকা লাগবে না, ডেলিভারি ম্যানের কাছ থেকে প্যাকেট বুঝে নিয়ে টাকা পরিশোধ করুন।
                 </p>
