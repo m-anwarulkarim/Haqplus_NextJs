@@ -1,0 +1,24 @@
+{
+  "01602867954": {
+    "data": {
+      "success": true,
+      "phone": "01602867954",
+      "total_parcel": 3,
+      "success_parcel": 3,
+      "cancelled_parcel": 0,
+      "success_rate": 100,
+      "risk_level": "SAFE",
+      "message": null,
+      "raw": {
+        "total_parcels": 3,
+        "total_delivered": 3,
+        "total_cancelled": 0,
+        "total_fraud_reports": []
+      },
+      "cached": false,
+      "cachedAt": "2026-09-15T13:45:34.411Z",
+      "cacheAgeDays": 0
+    },
+    "timestamp": 1789479934411
+  }
+}

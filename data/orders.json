@@ -16,7 +16,7 @@
     "total": 260,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -51,7 +51,7 @@
       }
     ],
     "createdAt": "2026-09-15T13:30:35.191Z",
-    "updatedAt": "2026-09-15T13:30:35.191Z"
+    "updatedAt": "2026-09-15T13:37:51.026Z"
   },
   {
     "id": "ord_cuid_1789475731420_l84zb",
@@ -469,7 +469,7 @@
     "total": 390,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -504,7 +504,7 @@
       }
     ],
     "createdAt": "2026-09-08T15:39:24.903Z",
-    "updatedAt": "2026-09-08T15:39:24.903Z"
+    "updatedAt": "2026-09-15T13:37:20.456Z"
   },
   {
     "id": "cmtsu4ftl0005vf8gs7n58e2n",

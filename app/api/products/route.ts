@@ -118,15 +118,22 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json({
-      products: formattedProducts,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        products: formattedProducts,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     console.error("Products GET error:", error);
     return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
