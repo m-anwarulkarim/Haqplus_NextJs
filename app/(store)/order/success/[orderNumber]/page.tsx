@@ -24,7 +24,49 @@ export default async function OrderSuccessPage({
   const order = await getResilientOrder(orderNumber);
 
   if (!order) {
-    notFound();
+    return (
+      <div className="container mx-auto px-4 sm:px-6 py-12 md:py-16">
+        <div className="max-w-2xl mx-auto space-y-8 text-center">
+          <div className="flex size-16 items-center justify-center rounded-3xl bg-emerald-500/10 text-emerald-600 mx-auto shadow-sm animate-in zoom-in-50 duration-300">
+            <CheckCircle2 className="size-8" />
+          </div>
+
+          <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-bold text-emerald-600">
+            অর্ডার সফল হয়েছে (Order Confirmed)
+          </span>
+
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            ধন্যবাদ! আপনার অর্ডারটি গ্রহণ করা হয়েছে।
+          </h1>
+
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto">
+            আপনার অর্ডারটি সফলভাবে সিস্টেমে রেকর্ড করা হয়েছে। আমাদের প্রতিনিধি দ্রুততম সময়ে পার্সেল কনফার্মেশনের জন্য কল করবেন।
+          </p>
+
+          <div className="pt-2">
+            <span className="inline-block rounded-xl border border-border bg-muted/40 px-4 py-1.5 font-mono text-sm font-bold text-emerald-600">
+              অর্ডার ইনভয়েস নম্বর: #{orderNumber}
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center pt-4">
+            <Button asChild className="w-full sm:w-auto rounded-2xl h-11 px-6 shadow-sm gap-2">
+              <Link href="/">
+                <ShoppingBag className="size-4" />
+                <span>শপিং চালিয়ে যান</span>
+              </Link>
+            </Button>
+
+            <Button variant="outline" asChild className="w-full sm:w-auto rounded-2xl h-11 px-6 gap-2">
+              <Link href={`/order/track/${orderNumber}`}>
+                <Truck className="size-4" />
+                <span>পার্সেল ট্র্যাকিং</span>
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const subtotal = Number(order.subtotal);
