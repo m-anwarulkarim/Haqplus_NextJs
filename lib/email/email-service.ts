@@ -205,15 +205,14 @@ export async function sendOrderShippedEmail(order: any, courierName = "Steadfast
 
 // Helper to send Status Update Email for any order status (PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, RETURNED)
 export async function sendOrderStatusEmail(order: any, status: string) {
-  if (!order.email && !order.customerEmail) return { success: false, error: "Customer email missing" };
-
   const statusUpper = (status || "").toUpperCase();
   if (statusUpper === "CONFIRMED") return sendOrderConfirmationEmail(order);
   if (statusUpper === "SHIPPED") return sendOrderShippedEmail(order, order.courierName || "Steadfast Courier", order.courierTrackingId || "");
 
-  const settings = getSettings();
   const targetEmail = order.email || order.customerEmail;
+  if (!targetEmail) return { success: false, error: "Customer email missing" };
 
+  const settings = getSettings();
   let subjectTemplate = "";
   let bodyTemplate = "";
 

@@ -1,5 +1,59 @@
 [
   {
+    "id": "ord_cuid_1789479035191_gzqxn",
+    "orderNumber": "ORD-035191-9923",
+    "userId": "usr-anwarul-admin",
+    "customerName": "ANWARUL KARIM",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 260,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 260,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_svzf6z",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "15/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1789479035191_0",
+        "orderId": "ord_cuid_1789479035191_gzqxn",
+        "productId": "cmtsye9w4000kvf1onhtxy020",
+        "variantId": null,
+        "productName": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+        "quantity": 1,
+        "price": 260,
+        "product": {
+          "id": "cmtsye9w4000kvf1onhtxy020",
+          "name": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+          "images": [
+            "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye9w4000kvf1onhtxy020"
+        }
+      }
+    ],
+    "createdAt": "2026-09-15T13:30:35.191Z",
+    "updatedAt": "2026-09-15T13:30:35.191Z"
+  },
+  {
     "id": "ord_cuid_1789475731420_l84zb",
     "orderNumber": "ORD-731420-3111",
     "userId": "usr-anwarul-admin",
@@ -105,7 +159,7 @@
       }
     ],
     "createdAt": "2026-09-15T12:30:07.072Z",
-    "updatedAt": "2026-09-15T13:19:01.102Z"
+    "updatedAt": "2026-09-15T13:28:57.861Z"
   },
   {
     "id": "ord_cuid_1789474708388_4dkfk",
@@ -115,16 +169,16 @@
     "phone": "01602867954",
     "email": "dev.anwarul@gmail.com",
     "division": "Dhaka",
-    "district": "Dhaka",
+    "district": "Bagerhat",
     "area": "Inside BD",
     "address": "mollahat, bagerhat, khulna",
     "subtotal": 1920,
     "discount": 0,
-    "shippingCharge": 0,
-    "total": 1920,
+    "shippingCharge": 60,
+    "total": 1980,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -141,76 +195,37 @@
     },
     "items": [
       {
-        "id": "item_1789474708388_0",
-        "orderId": "ord_cuid_1789474708388_4dkfk",
         "productId": "cmtsye9w4000kvf1onhtxy020",
-        "variantId": null,
-        "productName": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
-        "quantity": 3,
+        "name": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
         "price": 260,
-        "product": {
-          "id": "cmtsye9w4000kvf1onhtxy020",
-          "name": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
-          "images": [
-            "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
-          ],
-          "slug": "cmtsye9w4000kvf1onhtxy020"
-        }
+        "quantity": 3,
+        "image": "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
       },
       {
-        "id": "item_1789474708388_1",
-        "orderId": "ord_cuid_1789474708388_4dkfk",
         "productId": "cmtsye862000hvf1onqhke8ft",
-        "variantId": null,
-        "productName": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
-        "quantity": 1,
+        "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
         "price": 520,
-        "product": {
-          "id": "cmtsye862000hvf1onqhke8ft",
-          "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
-          "images": [
-            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80"
-          ],
-          "slug": "cmtsye862000hvf1onqhke8ft"
-        }
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80"
       },
       {
-        "id": "item_1789474708388_2",
-        "orderId": "ord_cuid_1789474708388_4dkfk",
         "productId": "cmtsye6lh000evf1os90v9tmy",
-        "variantId": null,
-        "productName": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
-        "quantity": 1,
+        "name": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
         "price": 340,
-        "product": {
-          "id": "cmtsye6lh000evf1os90v9tmy",
-          "name": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
-          "images": [
-            "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800&auto=format&fit=crop&q=80"
-          ],
-          "slug": "cmtsye6lh000evf1os90v9tmy"
-        }
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800&auto=format&fit=crop&q=80"
       },
       {
-        "id": "item_1789474708388_3",
-        "orderId": "ord_cuid_1789474708388_4dkfk",
         "productId": "cmtsye3i90008vf1os2f61vm5",
-        "variantId": null,
-        "productName": "HaqPlus শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (400g)",
-        "quantity": 1,
+        "name": "HaqPlus শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (400g)",
         "price": 280,
-        "product": {
-          "id": "cmtsye3i90008vf1os2f61vm5",
-          "name": "HaqPlus শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (400g)",
-          "images": [
-            "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
-          ],
-          "slug": "cmtsye3i90008vf1os2f61vm5"
-        }
+        "quantity": 1,
+        "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
       }
     ],
     "createdAt": "2026-09-15T12:18:28.388Z",
-    "updatedAt": "2026-09-15T12:18:28.388Z"
+    "updatedAt": "2026-09-15T13:27:48.642Z",
+    "advance": 0
   },
   {
     "id": "cmu0jktsy0004vfikph3yjb2t",
@@ -400,7 +415,7 @@
     "total": 280,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -435,7 +450,7 @@
       }
     ],
     "createdAt": "2026-09-08T16:12:26.571Z",
-    "updatedAt": "2026-09-08T16:12:26.571Z"
+    "updatedAt": "2026-09-15T13:29:18.450Z"
   },
   {
     "id": "cmtsu4u3v0009vf8gbg4ihsi2",

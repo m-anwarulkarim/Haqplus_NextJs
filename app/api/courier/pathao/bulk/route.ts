@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getResilientOrder, updateResilientOrder } from "@/lib/orders-store";
 import { createPathaoOrder, getPathaoCredentials, getPathaoStores } from "@/lib/courier/pathao";
+import { sendOrderShippedEmail } from "@/lib/email/email-service";
 
 export async function POST(req: Request) {
   try {
@@ -64,11 +65,17 @@ export async function POST(req: Request) {
         const consignmentId = res.consignment_id || res.data?.consignment_id || `PTH-${Date.now()}`;
 
         if (res.type === "success" || res.consignment_id || res.data?.consignment_id || res.code === 200) {
-          await updateResilientOrder(order.id, {
+          const updatedOrder = await updateResilientOrder(order.id, {
             courierTrackingId: String(consignmentId),
             courierStatus: "pathao_pending",
             orderStatus: "SHIPPED",
           });
+
+          if (updatedOrder) {
+            sendOrderShippedEmail(updatedOrder, "Pathao Courier", String(consignmentId)).catch((err) =>
+              console.warn("Pathao shipped email warning:", err)
+            );
+          }
 
           successCount++;
           processed.push({ orderId, success: true, trackingCode: consignmentId });

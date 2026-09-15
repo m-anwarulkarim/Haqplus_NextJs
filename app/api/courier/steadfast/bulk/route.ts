@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { createSteadfastOrder, getSteadfastCredentials } from "@/lib/courier/steadfast";
 import { getResilientOrders, updateResilientOrder } from "@/lib/orders-store";
 import { detectThanaFromAddress } from "@/lib/courier/thana-resolver";
+import { sendOrderShippedEmail } from "@/lib/email/email-service";
 
 export async function POST(req: Request) {
   try {
@@ -84,11 +85,16 @@ export async function POST(req: Request) {
         });
 
         if (res.status === 200 && res.consignment) {
-          await updateResilientOrder(order.id, {
+          const updatedOrder = await updateResilientOrder(order.id, {
             courierTrackingId: res.consignment.tracking_code,
             courierStatus: res.consignment.status || "in_review",
             orderStatus: "SHIPPED",
           });
+          if (updatedOrder) {
+            sendOrderShippedEmail(updatedOrder, "Steadfast Courier", res.consignment.tracking_code).catch((err) =>
+              console.warn("Steadfast shipped email warning:", err)
+            );
+          }
           results.push({ orderId: order.id, success: true, tracking: res.consignment.tracking_code });
         } else {
           results.push({ orderId: order.id, success: false, error: res.message });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getResilientOrder, updateResilientOrder } from "@/lib/orders-store";
+import { sendOrderStatusEmail } from "@/lib/email/email-service";
 
 export async function GET(
   req: Request,
@@ -51,9 +52,17 @@ export async function PUT(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Trigger confirmation or status update email asynchronously
+    if (updated.orderStatus) {
+      sendOrderStatusEmail(updated, updated.orderStatus).catch((err) =>
+        console.warn("Order status email send warning:", err)
+      );
+    }
+
     return NextResponse.json(updated);
   } catch (error) {
     console.error("Order update error:", error);
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }
+
