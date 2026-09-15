@@ -22,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/toast";
-import { DEFAULT_EMAIL_TEMPLATES } from "@/lib/email/email-service";
+import { DEFAULT_EMAIL_TEMPLATES } from "@/lib/email/email-templates-default";
 
 export default function EmailTemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
