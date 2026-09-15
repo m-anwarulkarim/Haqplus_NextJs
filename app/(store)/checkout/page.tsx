@@ -42,6 +42,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAltPhone, setShowAltPhone] = useState(false);
   const [showNote, setShowNote] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
 
   const {
     items,
@@ -87,7 +88,10 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (session?.user) {
       if (session.user.name) setValue("customerName", session.user.name);
-      if (session.user.email) setValue("email", session.user.email);
+      if (session.user.email) {
+        setValue("email", session.user.email);
+        setShowEmail(true);
+      }
     }
   }, [session, setValue]);
 
@@ -332,6 +336,19 @@ export default function CheckoutPage() {
                       <Plus className="size-3.5 text-slate-500" />
                       <span>বিশেষ নির্দেশনা</span>
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowEmail(!showEmail)}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-medium border transition-all cursor-pointer ${
+                        showEmail
+                          ? "bg-emerald-50 border-[#0f6848] text-[#0f6848]"
+                          : "bg-[#f1f3f5] border-slate-200/80 text-slate-700 hover:bg-slate-200"
+                      }`}
+                    >
+                      <Plus className="size-3.5 text-slate-500" />
+                      <span>ইমেইল এড্রেস</span>
+                    </button>
                   </div>
 
                   {/* Optional Alternative Phone Input */}
@@ -348,6 +365,25 @@ export default function CheckoutPage() {
                           placeholder="অন্য একটি মোবাইল নম্বর (যদি থাকে)"
                           className="h-11 pl-10 pr-4 rounded-xl bg-[#f8f9fa] border border-slate-200/90 text-sm font-mono"
                           {...register("altPhone")}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Optional Email Input */}
+                  {showEmail && (
+                    <div className="pt-1 animate-in fade-in-50 duration-200 space-y-1">
+                      <Label htmlFor="email" className="text-xs font-medium text-slate-700 block">
+                        ইমেইল এড্রেস (ঐচ্ছিক - ইনভয়েস ও নোটিফিকেশন পেতে)
+                      </Label>
+                      <div className="relative flex items-center">
+                        <Mail className="absolute left-3.5 size-4 text-slate-400 pointer-events-none" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="আপনার ইমেইল বা জিমেইল (যেমন: example@gmail.com)"
+                          className="h-11 pl-10 pr-4 rounded-xl bg-[#f8f9fa] border border-slate-200/90 text-sm"
+                          {...register("email")}
                         />
                       </div>
                     </div>
