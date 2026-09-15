@@ -70,7 +70,7 @@
     "total": 260,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "CONFIRMED",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -105,7 +105,7 @@
       }
     ],
     "createdAt": "2026-09-15T12:30:07.072Z",
-    "updatedAt": "2026-09-15T12:30:07.072Z"
+    "updatedAt": "2026-09-15T13:19:01.102Z"
   },
   {
     "id": "ord_cuid_1789474708388_4dkfk",
