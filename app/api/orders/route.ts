@@ -6,6 +6,7 @@ import { saveResilientOrder, getResilientOrders } from "@/lib/orders-store";
 import { prisma } from "@/lib/prisma";
 import { adminMessaging } from "@/lib/firebase-admin";
 import { triggerGsmAutoCall } from "@/lib/gsm-telephony";
+import { sendOrderConfirmationEmail } from "@/lib/email/email-service";
 import { z } from "zod";
 
 const createOrderSchema = checkoutSchema.extend({
@@ -296,6 +297,11 @@ export async function POST(req: Request) {
       customerName: createdOrder.customerName,
       totalAmount: createdOrder.total,
     }).catch((gsmErr) => console.warn("Background GSM Auto-Call trigger error:", gsmErr));
+
+    // Trigger Automated Order Confirmation Email asynchronously
+    if (createdOrder.email) {
+      sendOrderConfirmationEmail(createdOrder).catch((emailErr) => console.warn("Background Order Email Confirmation error:", emailErr));
+    }
 
     return NextResponse.json(
       {

@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Truck,
   BarChart3,
+  Mail,
 } from "lucide-react";
 import { AdminSidebarSettings } from "./admin-sidebar-settings";
 import { useAdminSidebar } from "./admin-sidebar-context";
@@ -312,6 +313,21 @@ export function AdminSidebar() {
             >
               <Plug className="size-4 shrink-0" />
               <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>API Integration</span>
+            </Link>
+
+            {/* Email Templates */}
+            <Link
+              href="/admin/email-templates"
+              onClick={closeMobileSidebar}
+              title="Email Templates"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                pathname.startsWith("/admin/email-templates")
+                  ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              }`}
+            >
+              <Mail className="size-4 shrink-0" />
+              <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Email Templates</span>
             </Link>
 
             {/* Interactive Collapsible Settings Tree */}
