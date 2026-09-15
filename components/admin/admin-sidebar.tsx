@@ -22,6 +22,7 @@ import {
   Truck,
   BarChart3,
   Mail,
+  Sparkles,
 } from "lucide-react";
 import { AdminSidebarSettings } from "./admin-sidebar-settings";
 import { useAdminSidebar } from "./admin-sidebar-context";
@@ -283,6 +284,21 @@ export function AdminSidebar() {
             >
               <FileText className="size-4 shrink-0" />
               <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Landing Pages</span>
+            </Link>
+
+            {/* Hero Sliders */}
+            <Link
+              href="/admin/sliders"
+              onClick={closeMobileSidebar}
+              title="Hero Sliders"
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                pathname.startsWith("/admin/sliders")
+                  ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+              }`}
+            >
+              <Sparkles className="size-4 text-amber-500 shrink-0" />
+              <span className={isCollapsed ? "md:hidden truncate" : "truncate"}>Hero Sliders</span>
             </Link>
 
             {/* Customers */}

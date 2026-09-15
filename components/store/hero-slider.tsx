@@ -76,19 +76,42 @@ const HERO_SLIDES: HeroSlide[] = [
 ];
 
 export function HeroSlider() {
+  const [slides, setSlides] = useState<HeroSlide[]>(HERO_SLIDES);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
-  const nextSlide = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % HERO_SLIDES.length);
+  useEffect(() => {
+    async function loadCustomSlides() {
+      try {
+        const res = await fetch("/api/settings/hero-sliders");
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.slides) && data.slides.length > 0) {
+            const activeOnly = data.slides.filter((s: any) => s.isActive !== false);
+            if (activeOnly.length > 0) {
+              setSlides(activeOnly);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch custom hero slides:", err);
+      }
+    }
+    loadCustomSlides();
   }, []);
+
+  const activeSlides = slides.length > 0 ? slides : HERO_SLIDES;
+
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % activeSlides.length);
+  }, [activeSlides.length]);
 
   const prevSlide = useCallback(() => {
     setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? HERO_SLIDES.length - 1 : prevIndex - 1
+      prevIndex === 0 ? activeSlides.length - 1 : prevIndex - 1
     );
-  }, []);
+  }, [activeSlides.length]);
 
   // Auto-play interval
   useEffect(() => {
@@ -129,7 +152,7 @@ export function HeroSlider() {
     >
       {/* Slides Container */}
       <div className="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/9] min-h-[420px] sm:min-h-[480px] w-full">
-        {HERO_SLIDES.map((slide, idx) => {
+        {activeSlides.map((slide, idx) => {
           const isActive = idx === currentIndex;
           return (
             <div
@@ -240,7 +263,7 @@ export function HeroSlider() {
 
       {/* Bottom Slider Indicator Dots */}
       <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-        {HERO_SLIDES.map((_, idx) => (
+        {activeSlides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentIndex(idx)}
