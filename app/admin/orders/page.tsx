@@ -254,7 +254,7 @@ export default function AdminPreConfirmOrdersPage() {
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-0.5 text-xs font-bold mb-1">
             <ShoppingCart className="size-3.5" />
-            <span>Order List (প্রাক-কনফার্ম প্রসেসিং)</span>
+            <span>Order List (কনফার্ম প্রসেসিং)</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Customer Orders Management

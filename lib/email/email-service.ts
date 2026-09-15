@@ -87,15 +87,12 @@ export async function sendEmail({
 
 // Helper to send Order Confirmation Email
 export async function sendOrderConfirmationEmail(order: any) {
-  if (!order.email && !order.customerEmail) {
-    console.log("No customer email provided for order:", order.orderNumber);
-    return { success: false, error: "Customer email missing" };
-  }
-
   const settings = getSettings();
   const targetEmail = order.email || order.customerEmail;
-  const subjectTemplate = settings.EMAIL_ORDER_CONFIRMATION_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT;
-  const bodyTemplate = settings.EMAIL_ORDER_CONFIRMATION_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY;
+  let customerResult: { success: boolean; error?: string; messageId?: string } = {
+    success: false,
+    error: "Customer email missing",
+  };
 
   const placeholderData = {
     customer_name: order.customerName || "গ্রাহক",
@@ -104,13 +101,18 @@ export async function sendOrderConfirmationEmail(order: any) {
     payment_method: order.paymentMethod || "COD",
     address: order.address || "",
     district: order.district || "",
+    phone: order.phone || "",
     shop_url: DEFAULT_SHOP_URL,
   };
 
-  const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
-  const plainTextBody = replacePlaceholders(bodyTemplate, placeholderData);
+  if (targetEmail) {
+    const subjectTemplate = settings.EMAIL_ORDER_CONFIRMATION_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT;
+    const bodyTemplate = settings.EMAIL_ORDER_CONFIRMATION_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY;
 
-  const htmlBody = `
+    const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
+    const plainTextBody = replacePlaceholders(bodyTemplate, placeholderData);
+
+    const htmlBody = `
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
   <div style="text-align: center; border-bottom: 2px solid #0f6848; padding-bottom: 16px; margin-bottom: 20px;">
     <h1 style="color: #0f6848; margin: 0; font-size: 24px; font-weight: bold;">haqplus Pure Organic Tea</h1>
@@ -128,32 +130,28 @@ export async function sendOrderConfirmationEmail(order: any) {
     © ${new Date().getFullYear()} haqplus Organic Tea Ltd. | <a href="${DEFAULT_SHOP_URL}" target="_blank" style="color: #0f6848; text-decoration: underline;">${DEFAULT_SHOP_URL.replace(/^https?:\/\//, '')}</a>
   </div>
 </div>
-  `;
+    `;
 
-  // Send to Customer
-  const result = await sendEmail({ to: targetEmail, subject: finalSubject, html: htmlBody });
+    // Send to Customer
+    customerResult = await sendEmail({ to: targetEmail, subject: finalSubject, html: htmlBody });
+  }
 
-  // Send Admin Alert if configured
+  // Send Admin Alert if configured (regardless of customer email presence)
   const adminEmail = settings.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL;
   if (adminEmail) {
     const adminSubjectTemplate = settings.EMAIL_ADMIN_ALERT_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ADMIN_ALERT_SUBJECT;
     const adminBodyTemplate = settings.EMAIL_ADMIN_ALERT_BODY || DEFAULT_EMAIL_TEMPLATES.ADMIN_ALERT_BODY;
 
-    const adminPlaceholderData = {
-      ...placeholderData,
-      phone: order.phone || "",
-    };
-
-    const adminBodyText = replacePlaceholders(adminBodyTemplate, adminPlaceholderData);
+    const adminBodyText = replacePlaceholders(adminBodyTemplate, placeholderData);
 
     sendEmail({
       to: adminEmail,
-      subject: replacePlaceholders(adminSubjectTemplate, adminPlaceholderData),
+      subject: replacePlaceholders(adminSubjectTemplate, placeholderData),
       html: `<div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #8b5cf6; border-radius: 8px; white-space: pre-line;">${adminBodyText}</div>`,
     }).catch((err) => console.error("Admin notification email error:", err));
   }
 
-  return result;
+  return customerResult;
 }
 
 // Helper to send Order Shipped Email

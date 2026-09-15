@@ -1,6 +1,40 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import { auth } from "@/lib/auth";
 import { checkSteadfastFraud } from "@/lib/courier/steadfast";
+
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 Days in Milliseconds
+
+function getCacheFilePath() {
+  const dirPath = path.join(process.cwd(), ".data");
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+  return path.join(dirPath, "fraud_cache.json");
+}
+
+function readFraudCache(): Record<string, { data: any; timestamp: number }> {
+  try {
+    const filePath = getCacheFilePath();
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      return JSON.parse(content) || {};
+    }
+  } catch (err) {
+    console.warn("Could not read fraud cache file:", err);
+  }
+  return {};
+}
+
+function writeFraudCache(cache: Record<string, { data: any; timestamp: number }>) {
+  try {
+    const filePath = getCacheFilePath();
+    fs.writeFileSync(filePath, JSON.stringify(cache, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Could not write fraud cache file:", err);
+  }
+}
 
 export async function GET(req: Request) {
   try {
@@ -11,6 +45,7 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const phone = searchParams.get("phone");
+    const forceRefresh = searchParams.get("force") === "true" || searchParams.get("refresh") === "true";
 
     if (!phone) {
       return NextResponse.json(
@@ -19,9 +54,26 @@ export async function GET(req: Request) {
       );
     }
 
+    const cleanPhone = phone.trim().replace(/\D/g, "");
+    const cache = readFraudCache();
+    const now = Date.now();
+    const cachedEntry = cache[cleanPhone];
+
+    // Check if valid cache exists (< 7 days old) and forceRefresh is false
+    if (!forceRefresh && cachedEntry && now - cachedEntry.timestamp < CACHE_TTL_MS) {
+      const ageDays = Math.floor((now - cachedEntry.timestamp) / (24 * 60 * 60 * 1000));
+      return NextResponse.json({
+        ...cachedEntry.data,
+        cached: true,
+        cachedAt: new Date(cachedEntry.timestamp).toISOString(),
+        cacheAgeDays: ageDays,
+      });
+    }
+
+    // Otherwise, fetch live data from Steadfast API
     const rawData = await checkSteadfastFraud(phone);
 
-    // Normalize Steadfast Fraud API Response (handles official field names like total_delivred, total_cancelled, total_parcels)
+    // Normalize Steadfast Fraud API Response
     const d = rawData?.data || rawData || {};
 
     const success_parcel = Number(
@@ -55,7 +107,7 @@ export async function GET(req: Request) {
       0
     );
 
-    if (total_parcel < (success_parcel + cancelled_parcel)) {
+    if (total_parcel < success_parcel + cancelled_parcel) {
       total_parcel = success_parcel + cancelled_parcel;
     }
 
@@ -73,9 +125,9 @@ export async function GET(req: Request) {
       risk_level = "MODERATE";
     }
 
-    return NextResponse.json({
+    const responsePayload = {
       success: true,
-      phone,
+      phone: cleanPhone,
       total_parcel,
       success_parcel,
       cancelled_parcel,
@@ -83,7 +135,19 @@ export async function GET(req: Request) {
       risk_level,
       message: rawData.message || null,
       raw: rawData,
-    });
+      cached: false,
+      cachedAt: new Date(now).toISOString(),
+      cacheAgeDays: 0,
+    };
+
+    // Save to 7-day persistent cache
+    cache[cleanPhone] = {
+      data: responsePayload,
+      timestamp: now,
+    };
+    writeFraudCache(cache);
+
+    return NextResponse.json(responsePayload);
   } catch (error: any) {
     console.error("Fraud check route error:", error);
     return NextResponse.json(

@@ -66,7 +66,7 @@ export default function AdminOrderDetailPage() {
   const [steadfastFraudData, setSteadfastFraudData] = useState<any>(null);
   const [isCheckingSteadfastFraud, setIsCheckingSteadfastFraud] = useState(false);
 
-  const handleCheckSteadfastFraud = async () => {
+  const handleCheckSteadfastFraud = async (force = false) => {
     const targetPhone = phone || order?.phone;
     if (!targetPhone) {
       toast.error("Phone number is required");
@@ -74,11 +74,16 @@ export default function AdminOrderDetailPage() {
     }
     setIsCheckingSteadfastFraud(true);
     try {
-      const res = await fetch(`/api/courier/steadfast/fraud-check?phone=${encodeURIComponent(targetPhone)}`);
+      const url = `/api/courier/steadfast/fraud-check?phone=${encodeURIComponent(targetPhone)}${force ? "&force=true" : ""}`;
+      const res = await fetch(url);
       const data = await res.json();
       setSteadfastFraudData(data);
       if (res.ok && data.success) {
-        toast.success(`Live Steadfast fraud record fetched for ${targetPhone}`);
+        if (data.cached) {
+          toast.success(`7-Day Cached Fraud Data Loaded (Fetched ${data.cacheAgeDays || 0}d ago)`);
+        } else {
+          toast.success(`Live Fresh Steadfast Record Fetched for ${targetPhone}`);
+        }
       } else {
         toast.error(data.error || "Failed to fetch Steadfast fraud data");
       }
@@ -1054,21 +1059,46 @@ export default function AdminOrderDetailPage() {
               <div className="space-y-1.5 text-[11px]">
                 <div className="flex items-center justify-between text-[10px] uppercase">
                   <span className="text-muted-foreground font-semibold">Steadfast Live API Record</span>
-                  <button
-                    type="button"
-                    onClick={handleCheckSteadfastFraud}
-                    disabled={isCheckingSteadfastFraud}
-                    className="text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-                  >
-                    {isCheckingSteadfastFraud ? <RefreshCw className="size-3 animate-spin" /> : <Search className="size-3" />}
-                    <span>Check Steadfast Fraud</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {steadfastFraudData && (
+                      <button
+                        type="button"
+                        onClick={() => handleCheckSteadfastFraud(true)}
+                        disabled={isCheckingSteadfastFraud}
+                        title="Force refresh live data from Steadfast"
+                        className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1 cursor-pointer bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20"
+                      >
+                        <RefreshCw className={`size-3 ${isCheckingSteadfastFraud ? "animate-spin" : ""}`} />
+                        <span>লাইভ রিফ্রেশ</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleCheckSteadfastFraud(false)}
+                      disabled={isCheckingSteadfastFraud}
+                      className="text-purple-600 dark:text-purple-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      {isCheckingSteadfastFraud ? <RefreshCw className="size-3 animate-spin" /> : <Search className="size-3" />}
+                      <span>{steadfastFraudData ? "Re-Check" : "Check Fraud"}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {steadfastFraudData ? (
                   <div className="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/25 space-y-1.5 font-mono text-[11px]">
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Phone: {steadfastFraudData.phone}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground">Phone: {steadfastFraudData.phone}</span>
+                        {steadfastFraudData.cached ? (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-amber-500/15 text-amber-600 dark:text-amber-400 font-sans font-bold">
+                            ⚡ 7-Day Cached ({steadfastFraudData.cacheAgeDays || 0}d)
+                          </span>
+                        ) : (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-sans font-bold">
+                            🟢 Live Fresh
+                          </span>
+                        )}
+                      </div>
                       <span className={`px-2 py-0.2 rounded text-[10px] font-extrabold ${
                         steadfastFraudData.risk_level === "SAFE"
                           ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
@@ -1098,7 +1128,7 @@ export default function AdminOrderDetailPage() {
                         <span className="size-1.5 rounded-full bg-emerald-500" /> SteadFast Network
                       </span>
                       <button
-                        onClick={handleCheckSteadfastFraud}
+                        onClick={() => handleCheckSteadfastFraud(false)}
                         disabled={isCheckingSteadfastFraud}
                         className="text-[10px] font-bold text-purple-600 dark:text-purple-400 hover:underline"
                       >
