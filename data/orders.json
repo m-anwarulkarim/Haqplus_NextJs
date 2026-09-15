@@ -16,7 +16,7 @@
     "total": 520,
     "paymentMethod": "COD",
     "paymentStatus": "PENDING",
-    "orderStatus": "PENDING",
+    "orderStatus": "NO_RESPONSE",
     "courierTrackingId": null,
     "courierStatus": null,
     "note": null,
@@ -51,7 +51,7 @@
       }
     ],
     "createdAt": "2026-09-15T12:35:31.420Z",
-    "updatedAt": "2026-09-15T12:35:31.420Z"
+    "updatedAt": "2026-09-15T13:04:05.218Z"
   },
   {
     "id": "ord_cuid_1789475407072_xf0r3",

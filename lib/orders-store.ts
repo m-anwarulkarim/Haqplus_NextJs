@@ -467,6 +467,7 @@ export async function updateResilientOrder(
     const updateData: any = {};
     if (data.customerName !== undefined) updateData.customerName = data.customerName;
     if (data.phone !== undefined) updateData.phone = data.phone;
+    if (data.email !== undefined) updateData.email = data.email;
     if (data.address !== undefined) updateData.address = data.address;
     if (data.subtotal !== undefined) updateData.subtotal = data.subtotal;
     if (data.discount !== undefined) updateData.discount = data.discount;

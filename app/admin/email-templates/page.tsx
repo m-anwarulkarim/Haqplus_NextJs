@@ -505,9 +505,7 @@ export default function EmailTemplatesPage() {
                   <CardTitle className="text-base font-extrabold text-foreground">
                     {activeConfig.label}
                   </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">
-                    অর্ডারের স্ট্যাটাস পরিবর্তন হয়ে &quot;{activeConfig.badge}&quot; হলে এই ইমেইল বার্তাটি কাস্টমারের কাছে যাবে।
-                  </CardDescription>
+
                 </div>
               </div>
 
@@ -554,9 +552,7 @@ export default function EmailTemplatesPage() {
                 <Label className="text-xs font-bold text-slate-700 block">
                   ইমেইল বার্তা / কাস্টম মেসেজ (Plain Text Message)
                 </Label>
-                <span className="text-xs text-emerald-600 font-medium">
-                  ✓ এইচটিএমএল কোডের কোনো দরকার নেই! সাধারণ টেক্সট লিখুন।
-                </span>
+
               </div>
 
               <Textarea

@@ -93,6 +93,7 @@ export default function AdminOrderDetailPage() {
   // Editable Order Form States
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
   const [orderStatus, setOrderStatus] = useState("CONFIRMED");
@@ -154,6 +155,7 @@ export default function AdminOrderDetailPage() {
         // Populate editable state
         setCustomerName(data.customerName || "");
         setPhone(data.phone || "");
+        setEmail(data.email || "");
         setAddress(data.address || "");
         setNote(data.note || "");
         setOrderStatus(data.orderStatus || "CONFIRMED");
@@ -288,6 +290,7 @@ export default function AdminOrderDetailPage() {
       const payload = {
         customerName,
         phone,
+        email: email.trim() || null,
         address,
         district: currentDistrict,
         note: note.trim() || null,
@@ -622,6 +625,42 @@ export default function AdminOrderDetailPage() {
                         <Plus className="size-3.5" />
                       </a>
                     </div>
+                  </div>
+                </div>
+
+                {/* Email / Gmail */}
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="text-muted-foreground font-semibold block flex items-center justify-between">
+                    <span>Customer Email / Gmail</span>
+                    {email && (
+                      <a
+                        href={`mailto:${email}`}
+                        className="text-[11px] text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 font-mono"
+                      >
+                        <Mail className="size-3" /> {email}
+                      </a>
+                    )}
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <div className="relative w-full flex items-center">
+                      <Mail className="absolute left-3 size-3.5 text-muted-foreground pointer-events-none" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-background border border-input dark:border-slate-700/80 rounded-lg pl-9 pr-3 py-2 text-foreground dark:text-slate-100 text-xs font-medium focus:outline-none focus:border-emerald-500"
+                        placeholder="customer@gmail.com (Optional)"
+                      />
+                    </div>
+                    {email && (
+                      <a
+                        href={`mailto:${email}`}
+                        title="Send Mail"
+                        className="size-8 rounded-lg bg-emerald-500/15 dark:bg-emerald-600/20 hover:bg-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30 shrink-0"
+                      >
+                        <Mail className="size-3.5" />
+                      </a>
+                    )}
                   </div>
                 </div>
 
