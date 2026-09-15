@@ -75,25 +75,25 @@ export default async function DealsPage() {
   ];
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-8 sm:space-y-12 pt-4 sm:pt-6 pb-20">
       {/* Top Hero Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-emerald-700 text-white p-8 sm:p-12 shadow-xl">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-orange-600 via-amber-600 to-emerald-700 text-white p-6 sm:p-10 lg:p-12 shadow-xl">
         <div className="relative z-10 max-w-2xl space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold backdrop-blur-sm">
             <Flame className="size-4 text-amber-300 animate-pulse" />
             <span>সীমিত সময়ের স্পেশাল ফ্ল্যাশ সেল</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
             খাঁটি শ্রীমঙ্গল চায়ের উপর <br />
             <span className="text-amber-300">আকর্ষণীয় মূল্যছাড়</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-white/90 leading-relaxed">
+          <p className="text-xs sm:text-base text-white/90 leading-relaxed">
             শ্রীমঙ্গলের বাছাইকৃত তাজা দুটি পাতা একটি কুঁড়ির অর্গানিক চা এখন বিশেষ অফার মূল্যে। সরাসরি বাগান থেকে সংগৃহীত সেরা মানের নিশ্চয়তা।
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-2">
             <Button size="lg" asChild className="rounded-2xl bg-white text-orange-600 hover:bg-white/90 font-bold shadow-md cursor-pointer">
               <Link href="#deals-grid">
                 <span>অফারের চা দেখুন</span>
@@ -119,7 +119,7 @@ export default async function DealsPage() {
           <h2 className="text-xl font-bold">অ্যাক্টিভ ডিসকাউন্ট কুপন কোড</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {coupons.map((coupon) => (
             <div
               key={coupon.code}
