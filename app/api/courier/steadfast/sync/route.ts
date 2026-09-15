@@ -36,11 +36,17 @@ export async function POST() {
           const newCourierStatus = String(res.delivery_status).toLowerCase();
           let newOrderStatus = order.orderStatus;
 
-          if (newCourierStatus === "delivered") {
+          if (newCourierStatus.includes("deliver") || newCourierStatus.includes("paid")) {
             newOrderStatus = "DELIVERED";
-          } else if (newCourierStatus === "cancelled") {
+          } else if (newCourierStatus.includes("cancel") || newCourierStatus.includes("return")) {
             newOrderStatus = "CANCELLED";
-          } else if (newCourierStatus === "in_transit" || newCourierStatus === "out_for_delivery") {
+          } else if (
+            newCourierStatus.includes("transit") ||
+            newCourierStatus.includes("out_for_delivery") ||
+            newCourierStatus.includes("dispatched") ||
+            newCourierStatus.includes("review") ||
+            newCourierStatus.includes("pending")
+          ) {
             newOrderStatus = "SHIPPED";
           }
 

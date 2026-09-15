@@ -19,6 +19,7 @@ import {
   Package,
   Printer,
   X,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +34,7 @@ import {
 } from "@/components/ui/table";
 import { toast } from "@/components/ui/toast";
 import { InvoiceView } from "@/components/admin/invoice-view";
+import { StatusDropdown } from "@/components/admin/status-dropdown";
 
 interface OrderItem {
   id: string;
@@ -219,6 +221,32 @@ export default function AdminPreConfirmOrdersPage() {
     }
   };
 
+  const getStatusSelectStyle = (status: string) => {
+    const s = (status || "PENDING").toUpperCase();
+    switch (s) {
+      case "PENDING":
+        return "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/40 hover:bg-amber-500/25";
+      case "INCOMPLETE":
+        return "bg-amber-600/15 text-amber-800 dark:text-amber-200 border-amber-600/40 hover:bg-amber-600/25";
+      case "NO_RESPONSE":
+        return "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/40 hover:bg-rose-500/25";
+      case "GOOD_NO_RESPONSE":
+        return "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/40 hover:bg-blue-500/25";
+      case "BUSY":
+        return "bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/40 hover:bg-purple-500/25";
+      case "HOLD":
+        return "bg-orange-500/15 text-orange-700 dark:text-orange-300 border-orange-500/40 hover:bg-orange-500/25";
+      case "PRE":
+        return "bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/40 hover:bg-teal-500/25";
+      case "CONFIRMED":
+        return "bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/50 hover:bg-emerald-600/30";
+      case "CANCELLED":
+        return "bg-rose-600/20 text-rose-700 dark:text-rose-300 border-rose-600/50 hover:bg-rose-600/30";
+      default:
+        return "bg-muted text-foreground border-border hover:bg-muted/80";
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title Header */}
@@ -398,22 +426,11 @@ export default function AdminPreConfirmOrdersPage() {
 
                       {/* Quick Status Change Selector */}
                       <TableCell>
-                        <select
-                          value={order.orderStatus || "PENDING"}
-                          disabled={updatingId === order.id}
-                          onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                          className="bg-background border border-border rounded-lg px-2.5 py-1 text-xs font-bold text-foreground focus:outline-none focus:border-emerald-500 cursor-pointer"
-                        >
-                          <option value="PENDING">🕒 Pending</option>
-                          <option value="INCOMPLETE">⚠️ Incomplete</option>
-                          <option value="NO_RESPONSE">📵 No Response</option>
-                          <option value="GOOD_NO_RESPONSE">👍 Good No Response</option>
-                          <option value="BUSY">📞 Busy</option>
-                          <option value="HOLD">⏸️ Hold</option>
-                          <option value="PRE">⏰ Pre</option>
-                          <option value="CANCELLED">❌ Cancel</option>
-                          <option value="CONFIRMED">✅ Confirmed</option>
-                        </select>
+                        <StatusDropdown
+                          value={order.orderStatus}
+                          isUpdating={updatingId === order.id}
+                          onChange={(newStatus) => handleUpdateStatus(order.id, newStatus)}
+                        />
                       </TableCell>
 
                       {/* Actions */}

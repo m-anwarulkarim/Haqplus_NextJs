@@ -34,12 +34,14 @@ import {
   Check,
   FileText,
   Copy,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InvoiceView } from "@/components/admin/invoice-view";
 import { toast } from "@/components/ui/toast";
+import { StatusDropdown } from "@/components/admin/status-dropdown";
 import { detectThanaFromAddress, BANGLADESH_THANAS_DICT, getThanaOptionsForDistrict, ALL_BANGLADESH_DISTRICTS } from "@/lib/courier/thana-resolver";
 
 export default function AdminOrderDetailPage() {
@@ -932,19 +934,7 @@ export default function AdminOrderDetailPage() {
               {/* Action Buttons & Status Selector */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <select
-                    value={orderStatus}
-                    onChange={(e) => setOrderStatus(e.target.value)}
-                    className="bg-emerald-500/15 dark:bg-emerald-600/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 font-bold text-xs rounded-lg px-3 py-2 focus:outline-none cursor-pointer"
-                  >
-                    <option value="CONFIRMED">CONFIRMED (কনফার্ম)</option>
-                    <option value="PENDING">PENDING (পেন্ডিং)</option>
-                    <option value="PROCESSING">PROCESSING (প্রসেসিং)</option>
-                    <option value="SHIPPED">SHIPPED (শিপড)</option>
-                    <option value="DELIVERED">DELIVERED (ডেলিভারড)</option>
-                    <option value="CANCELLED">CANCELLED (ক্যানসেল)</option>
-                    <option value="RETURNED">RETURNED (রিটার্ন)</option>
-                  </select>
+                  <StatusDropdown value={orderStatus} onChange={setOrderStatus} />
 
                   <button
                     onClick={fetchOrder}

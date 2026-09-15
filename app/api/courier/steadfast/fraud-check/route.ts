@@ -55,7 +55,7 @@ export async function GET(req: Request) {
       0
     );
 
-    if (total_parcel === 0 && (success_parcel > 0 || cancelled_parcel > 0)) {
+    if (total_parcel < (success_parcel + cancelled_parcel)) {
       total_parcel = success_parcel + cancelled_parcel;
     }
 

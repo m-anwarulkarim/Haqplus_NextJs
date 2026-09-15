@@ -210,6 +210,47 @@ export default function AdminOrdersConformPage() {
     }
   };
 
+  // Dispatch to Pathao Courier
+  const handlePathaoCourierEntry = async (targetIds?: string[]) => {
+    const idsToProcess = Array.isArray(targetIds) ? targetIds : selectedIds;
+    if (!idsToProcess || idsToProcess.length === 0) {
+      toast.error("Please select at least one order to enter into Pathao Courier");
+      return;
+    }
+
+    setIsDispatching(true);
+    try {
+      const res = await fetch("/api/courier/pathao/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderIds: idsToProcess }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Pathao courier entry failed");
+        return;
+      }
+
+      if (data.successCount === 0) {
+        const errorMsg =
+          data.processed?.[0]?.error ||
+          "Pathao Courier API check failed. Please verify Pathao credentials in /admin/api.";
+        toast.error(`Entry Failed: ${errorMsg}`);
+        return;
+      }
+
+      toast.success(`Entered ${data.successCount} orders into Pathao Courier!`);
+      setSelectedIds([]);
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+      toast.error("Network error during Pathao courier entry");
+    } finally {
+      setIsDispatching(false);
+    }
+  };
+
   // Mark selected orders as Printed
   const handleMarkPrinted = async () => {
     if (selectedIds.length === 0) {
@@ -385,10 +426,20 @@ export default function AdminOrdersConformPage() {
             size="sm"
             onClick={() => handleCourierEntry()}
             disabled={isDispatching}
-            className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1.5 h-9 shadow-xs"
+            className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold gap-1.5 h-9 shadow-xs"
           >
             {isDispatching ? <RefreshCw className="size-3.5 animate-spin" /> : <PackageCheck className="size-3.5" />}
-            <span>Entry</span>
+            <span>Steadfast Entry</span>
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => handlePathaoCourierEntry()}
+            disabled={isDispatching}
+            className="rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold gap-1.5 h-9 shadow-xs"
+          >
+            {isDispatching ? <RefreshCw className="size-3.5 animate-spin" /> : <Truck className="size-3.5" />}
+            <span>Pathao Entry</span>
           </Button>
 
           <Button

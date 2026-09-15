@@ -8,6 +8,7 @@ import { loginSchema } from "@/lib/validations/auth";
 import type { UserRole } from "@/types/next-auth";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: {

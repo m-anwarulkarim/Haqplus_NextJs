@@ -33,6 +33,16 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Progress, ProgressTrack, ProgressIndicator } from "@/components/ui/progress";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 interface Order {
   id: string;
@@ -62,6 +72,11 @@ export default function AdminCourierHubPage() {
   const [steadfastReturns, setSteadfastReturns] = useState<any[]>([]);
   const [isLoadingReturns, setIsLoadingReturns] = useState(false);
 
+  // Steadfast Bank Payments Ledger State
+  const [payments, setPayments] = useState<any[]>([]);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
+  const [showPaymentsLedger, setShowPaymentsLedger] = useState(false);
+
   // Active Tab State for Detailed Parcel Views
   const [activeDataTab, setActiveDataTab] = useState<"pending" | "today_cancelled" | "latest_returns" | "cancellation_requests">("pending");
 
@@ -70,7 +85,8 @@ export default function AdminCourierHubPage() {
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [statusResult, setStatusResult] = useState<any>(null);
 
-  // Steadfast Fraud Checker State
+  // Courier Fraud Checker State (Steadfast & Pathao)
+  const [fraudCourier, setFraudCourier] = useState<"steadfast" | "pathao">("steadfast");
   const [fraudPhone, setFraudPhone] = useState("");
   const [isCheckingFraud, setIsCheckingFraud] = useState(false);
   const [fraudResult, setFraudResult] = useState<any>(null);
@@ -86,17 +102,21 @@ export default function AdminCourierHubPage() {
     setIsCheckingFraud(true);
     setFraudResult(null);
     try {
-      const res = await fetch(`/api/courier/steadfast/fraud-check?phone=${encodeURIComponent(fraudPhone.trim())}`);
+      const endpoint = fraudCourier === "pathao" 
+        ? `/api/courier/pathao/fraud-check?phone=${encodeURIComponent(fraudPhone.trim())}`
+        : `/api/courier/steadfast/fraud-check?phone=${encodeURIComponent(fraudPhone.trim())}`;
+      
+      const res = await fetch(endpoint);
       const data = await res.json();
       setFraudResult(data);
       if (res.ok && data.success) {
-        toast.success(`Steadfast Fraud Check complete for ${data.phone}`);
+        toast.success(`${data.courier || fraudCourier.toUpperCase()} Fraud Check complete for ${data.phone}`);
       } else {
         toast.error(data.error || "Failed to check fraud record");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Network error checking Steadfast fraud database");
+      toast.error(`Network error checking ${fraudCourier.toUpperCase()} fraud database`);
     } finally {
       setIsCheckingFraud(false);
     }
@@ -161,6 +181,27 @@ export default function AdminCourierHubPage() {
     }
   };
 
+  const fetchSteadfastPayments = async () => {
+    setIsLoadingPayments(true);
+    try {
+      const res = await fetch("/api/courier/steadfast/payments");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setPayments(data);
+        } else if (Array.isArray(data.payments)) {
+          setPayments(data.payments);
+        } else if (Array.isArray(data.data)) {
+          setPayments(data.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching Steadfast payments:", err);
+    } finally {
+      setIsLoadingPayments(false);
+    }
+  };
+
   const syncLiveSteadfastStatus = async () => {
     setIsSyncing(true);
     try {
@@ -171,6 +212,7 @@ export default function AdminCourierHubPage() {
         await fetchOrders();
         await fetchBalanceAndSettings();
         await fetchSteadfastReturnRequests();
+        await fetchSteadfastPayments();
       } else {
         toast.error(data.error || "Live sync failed");
       }
@@ -186,6 +228,7 @@ export default function AdminCourierHubPage() {
     fetchOrders();
     fetchBalanceAndSettings();
     fetchSteadfastReturnRequests();
+    fetchSteadfastPayments();
   }, []);
 
   const handleCheckStatus = async (e?: React.FormEvent) => {
@@ -240,26 +283,42 @@ export default function AdminCourierHubPage() {
     return oStatus === "RETURNED" || oStatus === "CANCELLED" || cStatus.includes("CANCELLED") || cStatus.includes("RETURN");
   });
 
-  // Compute Overall Courier Performance Stats
+  // Compute Overall Courier Performance Stats (including Live Steadfast Payments & Balance API)
   const dispatchedOrders = orders.filter((o) => Boolean(o.courierTrackingId));
   const totalDispatchedCount = dispatchedOrders.length;
 
   const deliveredOrdersList = orders.filter((o) => {
     const oStatus = (o.orderStatus || "").toUpperCase();
     const cStatus = (o.courierStatus || "").toUpperCase();
-    return oStatus === "DELIVERED" || cStatus.includes("DELIVERED");
+    return oStatus === "DELIVERED" || cStatus.includes("DELIVERED") || cStatus.includes("PAID");
   });
-  const totalDeliveredCount = deliveredOrdersList.length;
 
-  const deliverySuccessPercentage = totalDispatchedCount > 0
-    ? ((totalDeliveredCount / totalDispatchedCount) * 100).toFixed(1)
+  // Calculate live payments sum from Steadfast Merchant Payments API
+  const liveSteadfastPaymentsTotal = payments.reduce((sum, p) => sum + Number(p.amount || p.total || 0), 0);
+  const dbDeliveredCODAmount = deliveredOrdersList.reduce((sum, o) => sum + Number(o.total || 0), 0);
+  const totalDeliveredCODAmount = dbDeliveredCODAmount > 0 ? dbDeliveredCODAmount : liveSteadfastPaymentsTotal;
+
+  // Effective delivered count factoring in live paid settlements from Steadfast API
+  const effectiveDeliveredCount = deliveredOrdersList.length > 0
+    ? deliveredOrdersList.length
+    : (payments.length > 0 ? payments.length : 0);
+
+  // Effective returned/cancelled count factoring in live Steadfast return requests
+  const effectiveReturnsCount = Math.max(latestReturnsList.length, steadfastReturns.length);
+
+  const effectiveTotalDispatchedCount = Math.max(
+    totalDispatchedCount,
+    effectiveDeliveredCount + pendingParcelsList.length + effectiveReturnsCount
+  );
+
+  const deliverySuccessPercentage = effectiveTotalDispatchedCount > 0
+    ? ((effectiveDeliveredCount / effectiveTotalDispatchedCount) * 100).toFixed(1)
     : "0.0";
 
-  const returnPercentage = totalDispatchedCount > 0
-    ? ((latestReturnsList.length / totalDispatchedCount) * 100).toFixed(1)
+  const returnPercentage = effectiveTotalDispatchedCount > 0
+    ? ((effectiveReturnsCount / effectiveTotalDispatchedCount) * 100).toFixed(1)
     : "0.0";
 
-  const totalDeliveredCODAmount = deliveredOrdersList.reduce((sum, o) => sum + Number(o.total || 0), 0);
   const totalPendingCODAmount = pendingParcelsList.reduce((sum, o) => sum + Number(o.total || 0), 0);
 
   // Compute District-Wise Delivery vs Return Breakdown
@@ -301,12 +360,23 @@ export default function AdminCourierHubPage() {
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Courier Logistics & Live Delivery Hub
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Real-time Steadfast parcel metrics, status sync, return requests & fraud risk checker.
-          </p>
+       
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Courier Provider Switcher Bar */}
+          <div className="flex bg-muted p-1 rounded-xl border border-border/80 text-xs font-bold shrink-0">
+            <span className="px-3 py-1.5 rounded-lg bg-purple-600 text-white shadow-xs">
+              Steadfast Hub
+            </span>
+            <Link
+              href="/admin/courier/pathao"
+              className="px-3 py-1.5 rounded-lg text-muted-foreground hover:text-foreground transition-all"
+            >
+              Pathao Hub
+            </Link>
+          </div>
+
           <Button
             onClick={syncLiveSteadfastStatus}
             disabled={isSyncing}
@@ -316,37 +386,28 @@ export default function AdminCourierHubPage() {
             <RefreshCw className={`size-3.5 ${isSyncing ? "animate-spin" : ""}`} />
             <span>{isSyncing ? "Syncing Live..." : "Sync Steadfast Live Status"}</span>
           </Button>
-
-          <Button asChild className="rounded-xl shadow-xs bg-purple-600 hover:bg-purple-700 text-white font-bold gap-2">
-            <Link href="/admin/orders/conform">
-              <PackageCheck className="size-4" />
-              <span>Go to Confirmed Orders</span>
-            </Link>
-          </Button>
         </div>
       </div>
 
-      {/* STEADFAST COURIER LIVE FRAUD CHECKER SEARCH TOOL (TOP PRIORITY) */}
+      {/* STEADFAST LIVE FRAUD CHECKER SEARCH TOOL */}
       <Card className="bg-gradient-to-br from-card via-card to-purple-500/5 p-4 sm:p-5 rounded-2xl border border-purple-500/30 shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="size-10 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
               <ShieldAlert className="size-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm sm:text-base text-foreground">Steadfast Courier Live Fraud Checker</h3>
-              <p className="text-xs text-muted-foreground">Search any customer phone number to inspect live Steadfast delivery & return history</p>
+              <h3 className="font-extrabold text-sm sm:text-base text-foreground flex items-center gap-2">
+                <span>Steadfast Live Fraud Checker</span>
+              </h3>
+              <p className="text-xs text-muted-foreground">Search customer phone number across Steadfast courier nationwide delivery records</p>
             </div>
           </div>
-
-          <Badge variant="outline" className="bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30 font-bold">
-            Official Steadfast API
-          </Badge>
         </div>
 
         <form onSubmit={handleCheckFraud} className="flex gap-2">
           <Input
-            placeholder="Enter customer phone number (e.g. 01712345678)"
+            placeholder={`Enter customer phone number for ${fraudCourier === "pathao" ? "Pathao" : "Steadfast"} check (e.g. 01712345678)`}
             value={fraudPhone}
             onChange={(e) => setFraudPhone(e.target.value)}
             className="rounded-xl text-xs font-mono bg-background"
@@ -355,74 +416,155 @@ export default function AdminCourierHubPage() {
             type="submit"
             disabled={isCheckingFraud}
             size="sm"
-            className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold gap-1.5 shrink-0 shadow-xs px-5"
+            className={`rounded-xl font-bold gap-1.5 shrink-0 shadow-xs px-5 text-white ${
+              fraudCourier === "pathao" ? "bg-red-600 hover:bg-red-700" : "bg-purple-600 hover:bg-purple-700"
+            }`}
           >
             {isCheckingFraud ? <RefreshCw className="size-3.5 animate-spin" /> : <Search className="size-3.5" />}
-            <span>Fraud Check</span>
+            <span>Check {fraudCourier === "pathao" ? "Pathao" : "Steadfast"}</span>
           </Button>
         </form>
 
         {/* Fraud Check Result Display */}
         {fraudResult && (
-          <div className="p-3.5 rounded-xl bg-muted/40 border border-border/80 space-y-2.5 animate-in fade-in duration-150">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-mono text-muted-foreground">Target Phone: <strong className="text-foreground">{fraudResult.phone}</strong></span>
-              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                fraudResult.risk_level === "SAFE"
-                  ? "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"
-                  : fraudResult.risk_level === "MODERATE"
-                  ? "bg-amber-500/15 text-amber-600 border border-amber-500/30"
-                  : fraudResult.risk_level === "HIGH_RISK"
-                  ? "bg-rose-500/15 text-rose-600 border border-rose-500/30"
-                  : "bg-gray-500/15 text-gray-500 border border-gray-500/30"
-              }`}>
-                {fraudResult.risk_level === "SAFE" ? "🟢 Safe Customer (উচ্চ সাফল্য)" : fraudResult.risk_level === "MODERATE" ? "🟡 Moderate Risk" : fraudResult.risk_level === "HIGH_RISK" ? "🔴 High Return Risk (ঝুঁকিপূর্ণ)" : "⚪ No Prior Steadfast Record"}
-              </span>
-            </div>
+          <div className="p-4 rounded-xl bg-muted/40 border border-border/80 space-y-3 animate-in fade-in duration-150">
+            {/* 1. API Request Error Handling */}
+            {fraudResult.error || !fraudResult.success ? (
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-900 dark:text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <XCircle className="size-5 text-rose-500 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="font-bold text-sm block">Fraud Check Error</strong>
+                    <p className="text-muted-foreground text-xs mt-0.5">{fraudResult.error || "Unable to fetch data from courier API"}</p>
+                  </div>
+                </div>
+                <Button size="sm" variant="outline" onClick={handleCheckFraud} className="rounded-lg text-xs shrink-0 font-bold border-rose-500/30">
+                  <RefreshCw className="size-3.5 mr-1" /> Retry Check
+                </Button>
+              </div>
+            ) : (
+              <>
+                {/* Header Information */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-muted-foreground">
+                      Target Phone ({fraudResult.courier || fraudCourier.toUpperCase()}): <strong className="text-foreground">{fraudResult.phone}</strong>
+                    </span>
+                    {fraudResult.data_source && (
+                      <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-600 dark:text-purple-300 border-purple-500/20 font-mono">
+                        {fraudResult.data_source}
+                      </Badge>
+                    )}
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold shrink-0 ${
+                    fraudResult.risk_level === "SAFE"
+                      ? "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"
+                      : fraudResult.risk_level === "MODERATE"
+                      ? "bg-amber-500/15 text-amber-600 border border-amber-500/30"
+                      : fraudResult.risk_level === "HIGH_RISK"
+                      ? "bg-rose-500/15 text-rose-600 border border-rose-500/30"
+                      : "bg-gray-500/15 text-gray-500 border border-gray-500/30"
+                  }`}>
+                    {fraudResult.risk_level === "SAFE"
+                      ? "🟢 Safe Customer (উচ্চ সাফল্য)"
+                      : fraudResult.risk_level === "MODERATE"
+                      ? "🟡 Moderate Risk"
+                      : fraudResult.risk_level === "HIGH_RISK"
+                      ? "🔴 High Return Risk (ঝুঁকিপূর্ণ)"
+                      : `⚪ No Prior ${fraudResult.courier || fraudCourier.toUpperCase()} Record`}
+                  </span>
+                </div>
 
-            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
-              <div className="bg-card p-2 rounded-lg border border-border/60">
-                <span className="text-[10px] text-muted-foreground block">Total Parcels</span>
-                <strong className="text-sm text-foreground">{fraudResult.total_parcel}</strong>
-              </div>
-              <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block">Successful</span>
-                <strong className="text-sm text-emerald-600 dark:text-emerald-400">{fraudResult.success_parcel}</strong>
-              </div>
-              <div className="bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
-                <span className="text-[10px] text-rose-600 dark:text-rose-400 block">Cancelled / Ret</span>
-                <strong className="text-sm text-rose-600 dark:text-rose-400">{fraudResult.cancelled_parcel}</strong>
-              </div>
-            </div>
+                {/* 2. Pathao Specific Formatted Guidance Cards */}
+                {fraudCourier === "pathao" && (
+                  <>
+                    {!fraudResult.is_pathao_connected ? (
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2">
+                            <AlertCircle className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="text-amber-900 dark:text-amber-200 font-bold block">
+                                Pathao Merchant API Not Connected
+                              </strong>
+                              <p className="text-amber-800 dark:text-amber-300 text-[11px] mt-0.5 leading-relaxed">
+                                Pathao require merchant authentication to query logistics data. Go to <strong>API Integration Center</strong> and enter your Pathao Merchant Email & Password.
+                              </p>
+                            </div>
+                          </div>
+                          <Button size="sm" asChild className="rounded-lg text-xs font-bold shrink-0 bg-amber-600 hover:bg-amber-700 text-white shadow-xs">
+                            <Link href="/admin/api">Connect Pathao</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ) : fraudResult.total_parcel === 0 ? (
+                      <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 text-xs space-y-1.5">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="size-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                          <div>
+                            <strong className="text-blue-900 dark:text-blue-200 font-bold block">
+                              Pathao Official Merchant API Connected
+                            </strong>
+                            <p className="text-blue-800 dark:text-blue-300 text-[11px] leading-relaxed mt-0.5">
+                              🔒 <strong>Pathao Privacy Notice:</strong> Pathao's official merchant policy protects customer data privacy and does not expose cross-merchant delivery history. Only orders dispatched directly through your store account are tracked.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                )}
 
-            <div className="space-y-1 pt-1">
-              <div className="flex justify-between text-[11px] font-mono">
-                <span className="text-muted-foreground">Steadfast Success Rate:</span>
-                <span className="font-bold text-foreground">{fraudResult.success_rate}%</span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2 overflow-hidden flex">
-                <div className="bg-emerald-500 h-full" style={{ width: `${Math.min(fraudResult.success_rate, 100)}%` }} />
-                <div className="bg-rose-500 h-full" style={{ width: `${Math.max(0, 100 - fraudResult.success_rate)}%` }} />
-              </div>
-            </div>
+                {/* 3. Parcel Statistics Grid (When data available or Steadfast) */}
+                {(fraudCourier === "steadfast" || fraudResult.total_parcel > 0) && (
+                  <>
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-1">
+                      <div className="bg-card p-2 rounded-lg border border-border/60">
+                        <span className="text-[10px] text-muted-foreground block">Total Parcels</span>
+                        <strong className="text-sm text-foreground">{fraudResult.total_parcel}</strong>
+                      </div>
+                      <div className="bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block">Successful</span>
+                        <strong className="text-sm text-emerald-600 dark:text-emerald-400">{fraudResult.success_parcel}</strong>
+                      </div>
+                      <div className="bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
+                        <span className="text-[10px] text-rose-600 dark:text-rose-400 block">Cancelled / Ret</span>
+                        <strong className="text-sm text-rose-600 dark:text-rose-400">{fraudResult.cancelled_parcel}</strong>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between text-[11px] font-mono">
+                        <span className="text-muted-foreground">{fraudResult.courier || fraudCourier.toUpperCase()} Success Rate:</span>
+                        <span className="font-bold text-foreground">{fraudResult.success_rate}%</span>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2 overflow-hidden flex">
+                        <div className="bg-emerald-500 h-full" style={{ width: `${Math.min(fraudResult.success_rate, 100)}%` }} />
+                        <div className="bg-rose-500 h-full" style={{ width: `${Math.max(0, 100 - fraudResult.success_rate)}%` }} />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
           </div>
         )}
       </Card>
 
       {/* COURIER API KEY MISSING WARNING BANNER */}
       {!hasApiKey && (
-        <div className="bg-amber-500/15 border border-amber-500/40 rounded-2xl p-4 sm:p-5 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm animate-in fade-in duration-200">
+        <Alert className="bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
           <div className="flex items-start gap-3">
-            <div className="size-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
-              <ShieldAlert className="size-6" />
+            <div className="size-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+              <ShieldAlert className="size-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm sm:text-base flex items-center gap-2">
-                <span>⚠️ Steadfast Courier API Credentials Required</span>
-              </h3>
-              <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+              <AlertTitle className="font-bold text-sm text-foreground">
+                Steadfast Courier API Credentials Required
+              </AlertTitle>
+              <AlertDescription className="text-xs text-muted-foreground leading-relaxed mt-0.5">
                 Please add your Steadfast <strong>Api-Key</strong> and <strong>Secret-Key</strong> in <strong>API Integration Center</strong> to enable live parcel dispatches, status sync, and fraud checks.
-              </p>
+              </AlertDescription>
             </div>
           </div>
 
@@ -432,8 +574,73 @@ export default function AdminCourierHubPage() {
               <ExternalLink className="size-3.5" />
             </Link>
           </Button>
-        </div>
+        </Alert>
       )}
+
+      {/* 5. INSTANT STEADFAST STATUS LOOKUP & MERCHANT BALANCE */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Account Balance Card */}
+        <Card className="p-4 rounded-2xl border-border/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="size-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <Wallet className="size-5" />
+              </div>
+              <span className="text-xs text-muted-foreground font-semibold">Steadfast Payout Balance</span>
+            </div>
+            <button
+              onClick={fetchBalanceAndSettings}
+              disabled={isFetchingBalance}
+              className="text-muted-foreground hover:text-foreground"
+              title="Refresh Balance"
+            >
+              <RefreshCw className={`size-3.5 ${isFetchingBalance ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+          <div className="mt-3">
+            <p className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
+              ৳{balance !== null ? balance.toLocaleString() : "..."}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Live account balance from Steadfast API
+            </p>
+          </div>
+        </Card>
+
+        {/* Instant Status Check Form */}
+        <Card className="md:col-span-2 p-4 rounded-2xl border-border/80 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-foreground">Instant Steadfast Parcel Status Lookup</span>
+            <span className="text-[11px] text-muted-foreground">Check real-time status by Tracking Code or Invoice</span>
+          </div>
+
+          <form onSubmit={handleCheckStatus} className="flex gap-2">
+            <Input
+              placeholder="Enter tracking code (e.g. STF-849201) or Invoice #"
+              value={statusQuery}
+              onChange={(e) => setStatusQuery(e.target.value)}
+              className="rounded-xl text-xs font-mono"
+            />
+            <Button
+              type="submit"
+              disabled={isCheckingStatus}
+              size="sm"
+              className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shrink-0"
+            >
+              {isCheckingStatus ? <RefreshCw className="size-3.5 animate-spin" /> : "Check Status"}
+            </Button>
+          </form>
+
+          {statusResult && (
+            <div className="mt-2.5 p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs flex items-center justify-between">
+              <span className="text-muted-foreground font-medium">QueryResult:</span>
+              <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-bold">
+                {statusResult.delivery_status || "Unknown"}
+              </Badge>
+            </div>
+          )}
+        </Card>
+      </div>
 
       {/* 1. REQUIRED REAL-TIME COURIER PARCEL METRICS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -564,9 +771,7 @@ export default function AdminCourierHubPage() {
               <h3 className="font-extrabold text-sm sm:text-base text-foreground flex items-center gap-2">
                 <span>Courier Performance & Return Analytics Report</span>
               </h3>
-              <p className="text-xs text-muted-foreground">
-                Dispatched consignments, delivery success rate, return analytics & pending COD payouts
-              </p>
+            
             </div>
           </div>
 
@@ -601,8 +806,8 @@ export default function AdminCourierHubPage() {
                     <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${Math.min(Number(deliverySuccessPercentage), 100)}%` }} />
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center justify-between font-mono">
-                    <span>Delivered: <strong>{totalDeliveredCount}</strong></span>
-                    <span>Total Sent: <strong>{totalDispatchedCount}</strong></span>
+                    <span>Delivered: <strong>{effectiveDeliveredCount}</strong></span>
+                    <span>Total Sent: <strong>{effectiveTotalDispatchedCount}</strong></span>
                   </p>
                 </div>
               </div>
@@ -623,7 +828,7 @@ export default function AdminCourierHubPage() {
                     <div className="bg-rose-500 h-full rounded-full" style={{ width: `${Math.min(Number(returnPercentage), 100)}%` }} />
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center justify-between font-mono">
-                    <span>Returned: <strong>{latestReturnsList.length}</strong></span>
+                    <span>Returned: <strong>{effectiveReturnsCount}</strong></span>
                     <span>Risk: <strong className={Number(returnPercentage) > 20 ? "text-rose-500" : "text-emerald-500"}>{Number(returnPercentage) > 20 ? "High" : "Normal"}</strong></span>
                   </p>
                 </div>
@@ -659,8 +864,9 @@ export default function AdminCourierHubPage() {
                   <div className="text-2xl font-black font-mono text-purple-600 dark:text-purple-400">
                     ৳{totalDeliveredCODAmount.toLocaleString()}
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-2">
-                    Collected from delivered orders
+                  <p className="text-[11px] text-muted-foreground mt-1 flex items-center justify-between font-mono">
+                    <span>Steadfast Paid:</span>
+                    {balance !== null && <strong className="text-purple-600 dark:text-purple-300">Bal: ৳{balance.toLocaleString()}</strong>}
                   </p>
                 </div>
               </div>
@@ -699,72 +905,103 @@ export default function AdminCourierHubPage() {
         )}
       </Card>
 
-      {/* 5. INSTANT STEADFAST STATUS LOOKUP & MERCHANT BALANCE */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Account Balance Card */}
-        <Card className="p-4 rounded-2xl border-border/80 shadow-2xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="size-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Wallet className="size-5" />
-              </div>
-              <span className="text-xs text-muted-foreground font-semibold">Steadfast Payout Balance</span>
+
+      {/* 6. STEADFAST BANK PAYOUT & SETTLEMENT LEDGER (COLLAPSIBLE BY DEFAULT) */}
+      <Card className="rounded-2xl border-border/80 p-4 sm:p-5 shadow-2xs space-y-4">
+        <div className="flex items-center justify-between border-b border-border/60 pb-3">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setShowPaymentsLedger(!showPaymentsLedger)}>
+            <div className="size-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <Wallet className="size-5" />
             </div>
-            <button
-              onClick={fetchBalanceAndSettings}
-              disabled={isFetchingBalance}
-              className="text-muted-foreground hover:text-foreground"
-              title="Refresh Balance"
-            >
-              <RefreshCw className={`size-3.5 ${isFetchingBalance ? "animate-spin" : ""}`} />
-            </button>
-          </div>
-          <div className="mt-3">
-            <p className="text-2xl font-extrabold font-mono text-emerald-600 dark:text-emerald-400">
-              ৳{balance !== null ? balance.toLocaleString() : "..."}
-            </p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">
-              Live account balance from Steadfast API
-            </p>
-          </div>
-        </Card>
-
-        {/* Instant Status Check Form */}
-        <Card className="md:col-span-2 p-4 rounded-2xl border-border/80 shadow-2xs flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-foreground">Instant Steadfast Parcel Status Lookup</span>
-            <span className="text-[11px] text-muted-foreground">Check real-time status by Tracking Code or Invoice</span>
+            <div>
+              <h3 className="font-extrabold text-sm sm:text-base text-foreground flex items-center gap-2">
+                <span>Steadfast Bank Settlement & Payout History Ledger</span>
+                {payments.length > 0 && (
+                  <Badge variant="outline" className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 text-[10px] font-bold">
+                    {payments.length} Records
+                  </Badge>
+                )}
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Historical COD payout disbursements transferred from Steadfast to your bank account
+              </p>
+            </div>
           </div>
 
-          <form onSubmit={handleCheckStatus} className="flex gap-2">
-            <Input
-              placeholder="Enter tracking code (e.g. STF-849201) or Invoice #"
-              value={statusQuery}
-              onChange={(e) => setStatusQuery(e.target.value)}
-              className="rounded-xl text-xs font-mono"
-            />
+          <div className="flex items-center gap-2">
             <Button
-              type="submit"
-              disabled={isCheckingStatus}
+              variant="ghost"
               size="sm"
-              className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shrink-0"
+              onClick={fetchSteadfastPayments}
+              disabled={isLoadingPayments}
+              className="rounded-xl text-xs gap-1.5 text-muted-foreground hover:text-foreground hidden sm:flex"
             >
-              {isCheckingStatus ? <RefreshCw className="size-3.5 animate-spin" /> : "Check Status"}
+              <RefreshCw className={`size-3.5 ${isLoadingPayments ? "animate-spin" : ""}`} />
+              <span>Refresh</span>
             </Button>
-          </form>
 
-          {statusResult && (
-            <div className="mt-2.5 p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs flex items-center justify-between">
-              <span className="text-muted-foreground font-medium">QueryResult:</span>
-              <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 font-bold">
-                {statusResult.delivery_status || "Unknown"}
-              </Badge>
-            </div>
-          )}
-        </Card>
-      </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowPaymentsLedger(!showPaymentsLedger)}
+              className="rounded-xl text-xs font-bold gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+            >
+              {showPaymentsLedger ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+              <span>{showPaymentsLedger ? "Hide Ledger" : "View Bank Ledger"}</span>
+            </Button>
+          </div>
+        </div>
 
-      {/* 6. API INTEGRATION & WEBHOOK QUICK STATUS CARD */}
+        {showPaymentsLedger && (
+          <div className="animate-in fade-in duration-200 space-y-4">
+            {payments.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground font-mono space-y-1 bg-muted/20 rounded-xl border border-dashed border-border/60">
+                <p>No recent bank payout settlement records found from Steadfast API.</p>
+                <p className="text-[11px] text-muted-foreground">Payouts are generated automatically when Steadfast completes weekly/bi-weekly bank transfers.</p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border/60 overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead className="text-[11px] font-mono uppercase font-bold text-muted-foreground">Payment ID / TRX</TableHead>
+                      <TableHead className="text-[11px] font-mono uppercase font-bold text-muted-foreground">Date</TableHead>
+                      <TableHead className="text-[11px] font-mono uppercase font-bold text-muted-foreground">Bank / Mobile Banking</TableHead>
+                      <TableHead className="text-[11px] font-mono uppercase font-bold text-muted-foreground text-right">Settled Amount</TableHead>
+                      <TableHead className="text-[11px] font-mono uppercase font-bold text-muted-foreground text-center">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="font-mono text-xs">
+                    {payments.map((p, idx) => (
+                      <TableRow key={p.id || p.payment_id || idx} className="hover:bg-muted/40 transition-colors">
+                        <TableCell className="font-bold text-foreground">
+                          {p.invoice || p.payment_id || p.trx_id || `PAY-${idx + 1}`}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {p.created_at || p.date || new Date().toLocaleDateString("en-GB")}
+                        </TableCell>
+                        <TableCell className="text-foreground font-medium">
+                          {p.bank_name || p.payment_method || "Bank Account Transfer"}
+                        </TableCell>
+                        <TableCell className="text-right font-black text-emerald-600 dark:text-emerald-400">
+                          ৳{Number(p.amount || p.total_amount || 0).toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
+                            {p.status || "DISBURSED"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* 7. API INTEGRATION & WEBHOOK QUICK STATUS CARD */}
       <Card className="border-border/80 p-5 rounded-2xl shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="size-10 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 mt-0.5">

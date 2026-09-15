@@ -18,5 +18,10 @@
   "googleVerification": "",
   "smsOrderPlacedTemplate": "প্রিয় {name}, haqplus এ আপনার অর্ডার #{order_id} সফল হয়েছে। মোট: ৳{total}।",
   "smsOrderShippedTemplate": "প্রিয় {name}, আপনার অর্ডার #{order_id} কুরিয়ারে পাঠানো হয়েছে। ট্র্যাকিং ID: {tracking_id}।",
-  "STEADFAST_WEBHOOK_TOKEN": "08e9a181b9759a2e12bb2d97d4814dae9c584a7c39e8808788a1625cb267e95b"
+  "STEADFAST_WEBHOOK_TOKEN": "08e9a181b9759a2e12bb2d97d4814dae9c584a7c39e8808788a1625cb267e95b",
+  "PATHAO_CLIENT_ID": "X7axlvJayv",
+  "PATHAO_CLIENT_SECRET": "jy8wSIvLhzhNqpg7miLuIIElxDk7fEIfl3gko6jG",
+  "PATHAO_USERNAME": "azwadhossain58@gmail.com",
+  "PATHAO_PASSWORD": "AHna4049@",
+  "PATHAO_BASE_URL": "https://api-hermes.pathao.com"
 }

@@ -17,60 +17,67 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export default async function StorefrontHomePage() {
-  // Fetch categories from database
-  const dbCategories = await prisma.category.findMany({
-    include: { _count: { select: { products: true } } },
-    orderBy: { name: "asc" },
-    take: 5,
-  });
+  let categories: any[] = [];
+  let products: any[] = [];
 
-  const categories = dbCategories.map((c) => ({
-    id: c.id,
-    name: c.name,
-    slug: c.slug,
-    image: c.image || "/placeholder.png",
-    itemCount: c._count.products,
-  }));
+  try {
+    // Fetch categories from database
+    const dbCategories = await prisma.category.findMany({
+      include: { _count: { select: { products: true } } },
+      orderBy: { name: "asc" },
+      take: 5,
+    });
 
-  // Fetch featured/active products from database
-  const dbProducts = await prisma.product.findMany({
-    where: { isActive: true },
-    include: {
-      category: { select: { name: true, slug: true } },
-      reviews: { select: { rating: true } },
-    },
-    orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
-  });
+    categories = dbCategories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      image: c.image || "/placeholder.png",
+      itemCount: c._count.products,
+    }));
 
-  const products = dbProducts.map((p) => {
-    const basePriceNum = Number(p.basePrice);
-    const discountPriceNum = p.discountPrice ? Number(p.discountPrice) : null;
-    const avgRating =
-      p.reviews && p.reviews.length > 0
-        ? Number(
-            (
-              p.reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) /
-              p.reviews.length
-            ).toFixed(1)
-          )
-        : 5.0;
+    // Fetch featured/active products from database
+    const dbProducts = await prisma.product.findMany({
+      where: { isActive: true },
+      include: {
+        category: { select: { name: true, slug: true } },
+        reviews: { select: { rating: true } },
+      },
+      orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
+    });
 
-    return {
-      id: p.id,
-      name: p.name,
-      slug: p.slug,
-      description: p.description,
-      images: p.images,
-      price: discountPriceNum ?? basePriceNum,
-      originalPrice: discountPriceNum ? basePriceNum : undefined,
-      category: p.category.name,
-      categorySlug: p.category.slug,
-      rating: avgRating,
-      reviewCount: p.reviews?.length || 0,
-      inStock: p.stock > 0,
-      isFeatured: p.isFeatured,
-    };
-  });
+    products = dbProducts.map((p) => {
+      const basePriceNum = Number(p.basePrice);
+      const discountPriceNum = p.discountPrice ? Number(p.discountPrice) : null;
+      const avgRating =
+        p.reviews && p.reviews.length > 0
+          ? Number(
+              (
+                p.reviews.reduce((acc: number, r: { rating: number }) => acc + r.rating, 0) /
+                p.reviews.length
+              ).toFixed(1)
+            )
+          : 5.0;
+
+      return {
+        id: p.id,
+        name: p.name,
+        slug: p.slug,
+        description: p.description,
+        images: p.images,
+        price: discountPriceNum ?? basePriceNum,
+        originalPrice: discountPriceNum ? basePriceNum : undefined,
+        category: p.category.name,
+        categorySlug: p.category.slug,
+        rating: avgRating,
+        reviewCount: p.reviews?.length || 0,
+        inStock: p.stock > 0,
+        isFeatured: p.isFeatured,
+      };
+    });
+  } catch (dbErr) {
+    console.warn("Storefront DB fetch fallback:", dbErr);
+  }
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-20">

@@ -38,7 +38,7 @@ const DEFAULT_WEBHOOK_TOKEN = "cea049f22c9296708185a89bbe3c17b57039bf61f0ab9eb14
 
 export default function AdminApiIntegrationsPage() {
   const [activeModal, setActiveModal] = useState<
-    "courier" | "sms" | "fraud" | "meta" | "notifications" | null
+    "courier" | "pathao" | "sms" | "fraud" | "meta" | "notifications" | null
   >(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -53,6 +53,13 @@ export default function AdminApiIntegrationsPage() {
     STEADFAST_WEBHOOK_TOKEN: DEFAULT_WEBHOOK_TOKEN,
     SHIPPING_INSIDE_DHAKA: "70",
     SHIPPING_OUTSIDE_DHAKA: "130",
+
+    // Pathao Courier API
+    PATHAO_CLIENT_ID: "",
+    PATHAO_CLIENT_SECRET: "",
+    PATHAO_USERNAME: "",
+    PATHAO_PASSWORD: "",
+    PATHAO_BASE_URL: "https://api-hermes.pathao.com",
 
     // SMS API
     smsBaseUrl: "https://api.sms-provider.com/v1",
@@ -107,6 +114,11 @@ export default function AdminApiIntegrationsPage() {
           STEADFAST_WEBHOOK_TOKEN: data.STEADFAST_WEBHOOK_TOKEN || DEFAULT_WEBHOOK_TOKEN,
           SHIPPING_INSIDE_DHAKA: data.SHIPPING_INSIDE_DHAKA || prev.SHIPPING_INSIDE_DHAKA,
           SHIPPING_OUTSIDE_DHAKA: data.SHIPPING_OUTSIDE_DHAKA || prev.SHIPPING_OUTSIDE_DHAKA,
+          PATHAO_CLIENT_ID: data.PATHAO_CLIENT_ID || prev.PATHAO_CLIENT_ID,
+          PATHAO_CLIENT_SECRET: data.PATHAO_CLIENT_SECRET || prev.PATHAO_CLIENT_SECRET,
+          PATHAO_USERNAME: data.PATHAO_USERNAME || prev.PATHAO_USERNAME,
+          PATHAO_PASSWORD: data.PATHAO_PASSWORD || prev.PATHAO_PASSWORD,
+          PATHAO_BASE_URL: data.PATHAO_BASE_URL || prev.PATHAO_BASE_URL,
           metaPixelId: data.metaPixelId || prev.metaPixelId,
           metaAccessToken: data.metaAccessToken || prev.metaAccessToken,
           metaTestEventCode: data.metaTestEventCode || prev.metaTestEventCode,
@@ -253,11 +265,19 @@ export default function AdminApiIntegrationsPage() {
   const API_ITEMS = [
     {
       id: "courier" as const,
-      name: "Courier API (Steadfast)",
+      name: "Steadfast Courier API",
       description: "Configure API Key, Secret Key & Webhook Token",
       icon: Truck,
       active: Boolean(formData.STEADFAST_API_KEY),
       highlight: true,
+    },
+    {
+      id: "pathao" as const,
+      name: "Pathao Courier API",
+      description: "Client ID, Secret, Merchant Credentials & Fraud Check",
+      icon: Truck,
+      active: Boolean(formData.PATHAO_CLIENT_ID || formData.PATHAO_USERNAME),
+      highlight: false,
     },
     {
       id: "sms" as const,
@@ -561,6 +581,114 @@ export default function AdminApiIntegrationsPage() {
             >
               {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
               <span>Save Configuration</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 1b: Pathao Courier API */}
+      <Dialog open={activeModal === "pathao"} onOpenChange={(open) => !open && setActiveModal(null)}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center">
+                <Truck className="size-5" />
+              </div>
+              <div>
+                <DialogTitle>Pathao Courier API</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Configure Pathao Client ID, Client Secret & Merchant Login Credentials.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="PATHAO_CLIENT_ID" className="text-xs font-semibold">
+                Pathao Client ID *
+              </Label>
+              <Input
+                id="PATHAO_CLIENT_ID"
+                name="PATHAO_CLIENT_ID"
+                placeholder="MvbmODneYA"
+                value={formData.PATHAO_CLIENT_ID}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="PATHAO_CLIENT_SECRET" className="text-xs font-semibold">
+                Pathao Client Secret *
+              </Label>
+              <Input
+                id="PATHAO_CLIENT_SECRET"
+                name="PATHAO_CLIENT_SECRET"
+                type="password"
+                placeholder="IOVoc6Idv9dfRcPO9OK9uC9..."
+                value={formData.PATHAO_CLIENT_SECRET}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="PATHAO_USERNAME" className="text-xs font-semibold">
+                Pathao Merchant Username (Email) *
+              </Label>
+              <Input
+                id="PATHAO_USERNAME"
+                name="PATHAO_USERNAME"
+                type="email"
+                placeholder="merchant@example.com"
+                value={formData.PATHAO_USERNAME}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="PATHAO_PASSWORD" className="text-xs font-semibold">
+                Pathao Merchant Password *
+              </Label>
+              <Input
+                id="PATHAO_PASSWORD"
+                name="PATHAO_PASSWORD"
+                type="password"
+                placeholder="••••••••"
+                value={formData.PATHAO_PASSWORD}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="PATHAO_BASE_URL" className="text-xs font-semibold">
+                Pathao API Base URL
+              </Label>
+              <Input
+                id="PATHAO_BASE_URL"
+                name="PATHAO_BASE_URL"
+                placeholder="https://api-hermes.pathao.com"
+                value={formData.PATHAO_BASE_URL}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Live URL: <code>https://api-hermes.pathao.com</code> | Sandbox URL: <code>https://courier-api-sandbox.pathao.com</code>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 justify-end items-center">
+            <Button
+              onClick={() => handleSaveSettings("Pathao Courier API")}
+              disabled={isSaving}
+              className="rounded-xl shadow-xs bg-red-600 hover:bg-red-700 text-white font-bold gap-1.5"
+            >
+              {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+              <span>Save Pathao Configuration</span>
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -29,7 +29,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { isCollapsed, toggleSidebar, closeMobileSidebar } = useAdminSidebar();
   
-  const isOverviewActive = pathname === "/admin" || pathname === "/admin/courier";
+  const isOverviewActive = pathname === "/admin" || pathname.startsWith("/admin/courier");
   const [overviewSubmenuOpen, setOverviewSubmenuOpen] = useState(isOverviewActive);
 
   const isOrdersActive = pathname.startsWith("/admin/orders");
@@ -136,7 +136,20 @@ export function AdminSidebar() {
                     }`}
                   >
                     <Truck className="size-3.5 shrink-0" />
-                    <span className="truncate">Courier Analytics</span>
+                    <span className="truncate">Steadfast Logistics</span>
+                  </Link>
+
+                  <Link
+                    href="/admin/courier/pathao"
+                    onClick={closeMobileSidebar}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                      pathname === "/admin/courier/pathao"
+                        ? "bg-red-600 text-white font-bold shadow-xs"
+                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    }`}
+                  >
+                    <Truck className="size-3.5 shrink-0" />
+                    <span className="truncate">Pathao Logistics</span>
                   </Link>
                 </div>
               )}

@@ -384,15 +384,14 @@ export async function checkSteadfastFraud(phone: string) {
   if (!cleanPhone || cleanPhone.length < 10) {
     return {
       status: 400,
-      error: "valid 11-digit phone number is required for Steadfast fraud check",
+      error: "valid 11-digit phone number is required for fraud check",
     };
   }
 
-  if (!creds) {
-    return {
-      status: 400,
-      error: "Steadfast API Key & Secret Key strictly required. Please set up API credentials in Admin -> API Integration.",
-    };
+  const headers: Record<string, string> = {};
+  if (creds) {
+    headers["Api-Key"] = creds.apiKey;
+    headers["Secret-Key"] = creds.secretKey;
   }
 
   try {
@@ -403,12 +402,7 @@ export async function checkSteadfastFraud(phone: string) {
 
     for (const url of endpoints) {
       try {
-        const res = await fetch(url, {
-          headers: {
-            "Api-Key": creds.apiKey,
-            "Secret-Key": creds.secretKey,
-          },
-        });
+        const res = await fetch(url, { headers, cache: "no-store" });
         const data = await safeParseJsonResponse(res);
         const inner = data?.data || data;
         if (
@@ -429,10 +423,8 @@ export async function checkSteadfastFraud(phone: string) {
 
     // Fallback: Return standard primary endpoint response
     const resFallback = await fetch(`https://portal.packzy.com/api/v1/fraud_check/${encodeURIComponent(cleanPhone)}`, {
-      headers: {
-        "Api-Key": creds.apiKey,
-        "Secret-Key": creds.secretKey,
-      },
+      headers,
+      cache: "no-store",
     });
     return await safeParseJsonResponse(resFallback);
   } catch (error) {
