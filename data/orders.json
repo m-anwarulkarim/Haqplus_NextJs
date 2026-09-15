@@ -1,5 +1,59 @@
 [
   {
+    "id": "ord_cuid_1789475407072_xf0r3",
+    "orderNumber": "ORD-407072-4608",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "পদ্মডাঙ্গা, কোদালিয়া, মোল্লাহাট,\nবাগেরহাট",
+    "subtotal": 260,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 260,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_jwqw1h",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "15/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1789475407072_0",
+        "orderId": "ord_cuid_1789475407072_xf0r3",
+        "productId": "cmtsye9w4000kvf1onhtxy020",
+        "variantId": null,
+        "productName": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+        "quantity": 1,
+        "price": 260,
+        "product": {
+          "id": "cmtsye9w4000kvf1onhtxy020",
+          "name": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+          "images": [
+            "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye9w4000kvf1onhtxy020"
+        }
+      }
+    ],
+    "createdAt": "2026-09-15T12:30:07.072Z",
+    "updatedAt": "2026-09-15T12:30:07.072Z"
+  },
+  {
     "id": "ord_cuid_1789474708388_4dkfk",
     "orderNumber": "ORD-708387-4802",
     "userId": "usr-anwarul-admin",
