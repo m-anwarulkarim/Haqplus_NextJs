@@ -1,5 +1,110 @@
 [
   {
+    "id": "ord_cuid_1789474708388_4dkfk",
+    "orderNumber": "ORD-708387-4802",
+    "userId": "usr-anwarul-admin",
+    "customerName": "Anwarul Karim",
+    "phone": "01602867954",
+    "email": "dev.anwarul@gmail.com",
+    "division": "Dhaka",
+    "district": "Dhaka",
+    "area": "Inside BD",
+    "address": "mollahat, bagerhat, khulna",
+    "subtotal": 1920,
+    "discount": 0,
+    "shippingCharge": 0,
+    "total": 1920,
+    "paymentMethod": "COD",
+    "paymentStatus": "PENDING",
+    "orderStatus": "PENDING",
+    "courierTrackingId": null,
+    "courierStatus": null,
+    "note": null,
+    "deviceInfo": {
+      "source": "Direct Web",
+      "fingerprint": "fp_7pjnad",
+      "ipAddress": "::1",
+      "device": "পিসি (Chrome)",
+      "totalVisits": 1,
+      "activeTime": "14s",
+      "avgLoad": "1.9s",
+      "firstVisit": "15/09/2026",
+      "isBanned": false
+    },
+    "items": [
+      {
+        "id": "item_1789474708388_0",
+        "orderId": "ord_cuid_1789474708388_4dkfk",
+        "productId": "cmtsye9w4000kvf1onhtxy020",
+        "variantId": null,
+        "productName": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+        "quantity": 3,
+        "price": 260,
+        "product": {
+          "id": "cmtsye9w4000kvf1onhtxy020",
+          "name": "HaqPlus তুলসি আদা ভেষজ ওয়েলনেস টি (100g)",
+          "images": [
+            "https://images.unsplash.com/photo-1571934811356-5cc061b6821f?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye9w4000kvf1onhtxy020"
+        }
+      },
+      {
+        "id": "item_1789474708388_1",
+        "orderId": "ord_cuid_1789474708388_4dkfk",
+        "productId": "cmtsye862000hvf1onqhke8ft",
+        "variantId": null,
+        "productName": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+        "quantity": 1,
+        "price": 520,
+        "product": {
+          "id": "cmtsye862000hvf1onqhke8ft",
+          "name": "HaqPlus সিলেট অর্থোডক্স গোল্ডেন টিপ টি (150g)",
+          "images": [
+            "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye862000hvf1onqhke8ft"
+        }
+      },
+      {
+        "id": "item_1789474708388_2",
+        "orderId": "ord_cuid_1789474708388_4dkfk",
+        "productId": "cmtsye6lh000evf1os90v9tmy",
+        "variantId": null,
+        "productName": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
+        "quantity": 1,
+        "price": 340,
+        "product": {
+          "id": "cmtsye6lh000evf1os90v9tmy",
+          "name": "HaqPlus স্পেশাল রয়েল মসলা চা ব্লেন্ড (250g)",
+          "images": [
+            "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye6lh000evf1os90v9tmy"
+        }
+      },
+      {
+        "id": "item_1789474708388_3",
+        "orderId": "ord_cuid_1789474708388_4dkfk",
+        "productId": "cmtsye3i90008vf1os2f61vm5",
+        "variantId": null,
+        "productName": "HaqPlus শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (400g)",
+        "quantity": 1,
+        "price": 280,
+        "product": {
+          "id": "cmtsye3i90008vf1os2f61vm5",
+          "name": "HaqPlus শ্রীমঙ্গল প্রিমিয়াম সিটিসি ব্ল্যাক টি (400g)",
+          "images": [
+            "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800&auto=format&fit=crop&q=80"
+          ],
+          "slug": "cmtsye3i90008vf1os2f61vm5"
+        }
+      }
+    ],
+    "createdAt": "2026-09-15T12:18:28.388Z",
+    "updatedAt": "2026-09-15T12:18:28.388Z"
+  },
+  {
     "id": "cmu0jktsy0004vfikph3yjb2t",
     "orderNumber": "ORD-963877-7693",
     "userId": null,

@@ -95,50 +95,35 @@ export async function sendOrderConfirmationEmail(order: any) {
   const subjectTemplate = settings.EMAIL_ORDER_CONFIRMATION_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT;
   const bodyTemplate = settings.EMAIL_ORDER_CONFIRMATION_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY;
 
-  // Build items HTML table
-  const items = order.items || [];
-  let itemsTableHtml = `
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-      <thead>
-        <tr style="background-color: #f1f5f9; text-align: left;">
-          <th style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px;">পণ্য</th>
-          <th style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px; text-align: center;">পরিমাণ</th>
-          <th style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px; text-align: right;">মূল্য</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  items.forEach((it: any) => {
-    const itemName = it.productName || it.name || it.product?.name || "Tea Product";
-    const qty = it.quantity || 1;
-    const price = it.price || 0;
-    itemsTableHtml += `
-      <tr>
-        <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px;">${itemName}</td>
-        <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px; text-align: center;">${qty}</td>
-        <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 13px; text-align: right;">৳${price * qty}</td>
-      </tr>
-    `;
-  });
-
-  itemsTableHtml += `</tbody></table>`;
-
   const placeholderData = {
     customer_name: order.customerName || "গ্রাহক",
     order_number: order.orderNumber || String(order.id),
     total_amount: String(order.total || 0),
-    payment_method: order.paymentMethod || "CASH_ON_DELIVERY",
+    payment_method: order.paymentMethod || "COD",
     address: order.address || "",
     district: order.district || "",
-    items_table: itemsTableHtml,
   };
 
   const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
-  const finalBody = replacePlaceholders(bodyTemplate, placeholderData);
+  const plainTextBody = replacePlaceholders(bodyTemplate, placeholderData);
+
+  const htmlBody = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+  <div style="text-align: center; border-bottom: 2px solid #0f6848; padding-bottom: 16px; margin-bottom: 20px;">
+    <h1 style="color: #0f6848; margin: 0; font-size: 24px; font-weight: bold;">haqplus Pure Organic Tea</h1>
+    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">শ্রীমঙ্গলের ১০০% খাঁটি প্রিমিয়াম চা পাতা</p>
+  </div>
+  <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
+    ${plainTextBody}
+  </div>
+  <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+  </div>
+</div>
+  `;
 
   // Send to Customer
-  const result = await sendEmail({ to: targetEmail, subject: finalSubject, html: finalBody });
+  const result = await sendEmail({ to: targetEmail, subject: finalSubject, html: htmlBody });
 
   // Send Admin Alert if configured
   const adminEmail = settings.ADMIN_NOTIFICATION_EMAIL || process.env.ADMIN_NOTIFICATION_EMAIL;
@@ -151,10 +136,12 @@ export async function sendOrderConfirmationEmail(order: any) {
       phone: order.phone || "",
     };
 
+    const adminBodyText = replacePlaceholders(adminBodyTemplate, adminPlaceholderData);
+
     sendEmail({
       to: adminEmail,
       subject: replacePlaceholders(adminSubjectTemplate, adminPlaceholderData),
-      html: replacePlaceholders(adminBodyTemplate, adminPlaceholderData),
+      html: `<div style="font-family: Arial, sans-serif; padding: 20px; border: 2px solid #8b5cf6; border-radius: 8px; white-space: pre-line;">${adminBodyText}</div>`,
     }).catch((err) => console.error("Admin notification email error:", err));
   }
 
@@ -171,31 +158,101 @@ export async function sendOrderShippedEmail(order: any, courierName = "Steadfast
   const bodyTemplate = settings.EMAIL_ORDER_SHIPPED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_BODY;
 
   const code = trackingCode || order.courierTrackingId || "Pending";
-  let trackingLinkBtn = "";
-  if (code && code !== "Pending") {
-    const trackingUrl = courierName.toLowerCase().includes("pathao")
-      ? `https://pathao.com/tracking`
-      : `https://steadfast.com.bd/tl/${code}`;
-
-    trackingLinkBtn = `
-      <div style="margin-top: 15px; text-align: center;">
-        <a href="${trackingUrl}" target="_blank" style="background-color: #2563eb; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-          পার্সেল লাইভ ট্র্যাক করুন
-        </a>
-      </div>
-    `;
-  }
+  const trackingUrl = courierName.toLowerCase().includes("pathao")
+    ? `https://pathao.com/tracking`
+    : `https://steadfast.com.bd/tl/${code}`;
 
   const placeholderData = {
     customer_name: order.customerName || "গ্রাহক",
     order_number: order.orderNumber || String(order.id),
     courier_name: courierName,
     tracking_code: code,
-    tracking_link_button: trackingLinkBtn,
+    tracking_link: trackingUrl,
   };
 
   const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
-  const finalBody = replacePlaceholders(bodyTemplate, placeholderData);
+  const plainTextBody = replacePlaceholders(bodyTemplate, placeholderData);
 
-  return sendEmail({ to: targetEmail, subject: finalSubject, html: finalBody });
+  const htmlBody = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+  <div style="text-align: center; border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 20px;">
+    <h1 style="color: #2563eb; margin: 0; font-size: 24px; font-weight: bold;">haqplus Courier Dispatch</h1>
+    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">পার্সেল কুরিয়ার ট্র্যাকিং নোটিফিকেশন</p>
+  </div>
+  <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
+    ${plainTextBody}
+  </div>
+  <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+  </div>
+</div>
+  `;
+
+  return sendEmail({ to: targetEmail, subject: finalSubject, html: htmlBody });
+}
+
+// Helper to send Status Update Email for any order status (PENDING, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, CANCELLED, RETURNED)
+export async function sendOrderStatusEmail(order: any, status: string) {
+  if (!order.email && !order.customerEmail) return { success: false, error: "Customer email missing" };
+
+  const statusUpper = (status || "").toUpperCase();
+  if (statusUpper === "CONFIRMED") return sendOrderConfirmationEmail(order);
+  if (statusUpper === "SHIPPED") return sendOrderShippedEmail(order, order.courierName || "Steadfast Courier", order.courierTrackingId || "");
+
+  const settings = getSettings();
+  const targetEmail = order.email || order.customerEmail;
+
+  let subjectTemplate = "";
+  let bodyTemplate = "";
+
+  if (statusUpper === "PENDING") {
+    subjectTemplate = settings.EMAIL_ORDER_PENDING_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_SUBJECT;
+    bodyTemplate = settings.EMAIL_ORDER_PENDING_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_BODY;
+  } else if (statusUpper === "PROCESSING") {
+    subjectTemplate = settings.EMAIL_ORDER_PROCESSING_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_SUBJECT;
+    bodyTemplate = settings.EMAIL_ORDER_PROCESSING_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_BODY;
+  } else if (statusUpper === "DELIVERED") {
+    subjectTemplate = settings.EMAIL_ORDER_DELIVERED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_SUBJECT;
+    bodyTemplate = settings.EMAIL_ORDER_DELIVERED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_BODY;
+  } else if (statusUpper === "CANCELLED") {
+    subjectTemplate = settings.EMAIL_ORDER_CANCELLED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_SUBJECT;
+    bodyTemplate = settings.EMAIL_ORDER_CANCELLED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_BODY;
+  } else if (statusUpper === "RETURNED") {
+    subjectTemplate = settings.EMAIL_ORDER_RETURNED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_SUBJECT;
+    bodyTemplate = settings.EMAIL_ORDER_RETURNED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_BODY;
+  } else {
+    return { success: false, error: "Status template not mapped" };
+  }
+
+  const placeholderData = {
+    customer_name: order.customerName || "গ্রাহক",
+    order_number: order.orderNumber || String(order.id),
+    total_amount: String(order.total || 0),
+    payment_method: order.paymentMethod || "COD",
+    address: order.address || "",
+    district: order.district || "",
+    courier_name: order.courierName || "Steadfast Courier",
+    tracking_code: order.courierTrackingId || "N/A",
+    tracking_link: order.courierTrackingId ? `https://steadfast.com.bd/tl/${order.courierTrackingId}` : "#",
+  };
+
+  const finalSubject = replacePlaceholders(subjectTemplate, placeholderData);
+  const plainTextBody = replacePlaceholders(bodyTemplate, placeholderData);
+
+  const htmlBody = `
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+  <div style="text-align: center; border-bottom: 2px solid #0f6848; padding-bottom: 16px; margin-bottom: 20px;">
+    <h1 style="color: #0f6848; margin: 0; font-size: 24px; font-weight: bold;">haqplus Pure Organic Tea</h1>
+    <p style="color: #64748b; font-size: 13px; margin-top: 4px;">শ্রীমঙ্গলের ১০০% খাঁটি প্রিমিয়াম চা পাতা</p>
+  </div>
+  <div style="color: #1e293b; font-size: 14px; line-height: 1.7; white-space: pre-line;">
+    ${plainTextBody}
+  </div>
+  <div style="margin-top: 30px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 16px; font-size: 12px; color: #94a3b8;">
+    © ${new Date().getFullYear()} haqplus Organic Tea Ltd. All rights reserved.
+  </div>
+</div>
+  `;
+
+  return sendEmail({ to: targetEmail, subject: finalSubject, html: htmlBody });
 }

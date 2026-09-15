@@ -15,39 +15,177 @@ import {
   PackageCheck,
   Truck,
   XCircle,
+  Clock,
+  Check,
+  Package,
+  Undo2,
+  Eye,
+  Sliders,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "@/components/ui/toast";
 import { DEFAULT_EMAIL_TEMPLATES } from "@/lib/email/email-templates-default";
+
+type StatusKey =
+  | "pending"
+  | "confirmation"
+  | "processing"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "returned";
+
+interface StatusConfig {
+  key: StatusKey;
+  label: string;
+  badge: string;
+  badgeColor: string;
+  icon: any;
+  subjectKey: string;
+  bodyKey: string;
+  defaultSubject: string;
+  defaultBody: string;
+}
+
+const STATUS_CONFIGS: StatusConfig[] = [
+  {
+    key: "pending",
+    label: "পেন্ডিং অর্ডার (Pending Order)",
+    badge: "⏳ PENDING",
+    badgeColor: "bg-amber-500/10 text-amber-600 border-amber-200",
+    icon: Clock,
+    subjectKey: "pendingSubject",
+    bodyKey: "pendingBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_BODY,
+  },
+  {
+    key: "confirmation",
+    label: "কনফার্মড অর্ডার (Confirmed Order)",
+    badge: "✅ CONFIRMED",
+    badgeColor: "bg-emerald-500/10 text-emerald-600 border-emerald-200",
+    icon: CheckCircle2,
+    subjectKey: "confirmationSubject",
+    bodyKey: "confirmationBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY,
+  },
+  {
+    key: "processing",
+    label: "প্রসেসিং অর্ডার (Processing Order)",
+    badge: "📦 PROCESSING",
+    badgeColor: "bg-purple-500/10 text-purple-600 border-purple-200",
+    icon: Package,
+    subjectKey: "processingSubject",
+    bodyKey: "processingBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_BODY,
+  },
+  {
+    key: "shipped",
+    label: "শিপড নোটিফিকেশন (Shipped & Tracking)",
+    badge: "🚚 SHIPPED",
+    badgeColor: "bg-blue-500/10 text-blue-600 border-blue-200",
+    icon: Truck,
+    subjectKey: "shippedSubject",
+    bodyKey: "shippedBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_BODY,
+  },
+  {
+    key: "delivered",
+    label: "ডেলিভারি সম্পন্ন (Delivered Order)",
+    badge: "🎉 DELIVERED",
+    badgeColor: "bg-green-500/10 text-green-600 border-green-200",
+    icon: PackageCheck,
+    subjectKey: "deliveredSubject",
+    bodyKey: "deliveredBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_BODY,
+  },
+  {
+    key: "cancelled",
+    label: "বাতিল অর্ডার (Cancelled Order)",
+    badge: "❌ CANCELLED",
+    badgeColor: "bg-rose-500/10 text-rose-600 border-rose-200",
+    icon: XCircle,
+    subjectKey: "cancelledSubject",
+    bodyKey: "cancelledBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_BODY,
+  },
+  {
+    key: "returned",
+    label: "রিটার্নড অর্ডার (Returned Order)",
+    badge: "🔄 RETURNED",
+    badgeColor: "bg-slate-500/10 text-slate-600 border-slate-200",
+    icon: Undo2,
+    subjectKey: "returnedSubject",
+    bodyKey: "returnedBody",
+    defaultSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_SUBJECT,
+    defaultBody: DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_BODY,
+  },
+];
+
+const PLACEHOLDERS = [
+  { tag: "{customer_name}", desc: "গ্রাহকের নাম" },
+  { tag: "{order_number}", desc: "অর্ডার আইডি" },
+  { tag: "{total_amount}", desc: "সর্বমোট টাকা" },
+  { tag: "{address}", desc: "কাস্টমার ঠিকানা" },
+  { tag: "{district}", desc: "জেলা" },
+  { tag: "{courier_name}", desc: "কুরিয়ার নাম" },
+  { tag: "{tracking_code}", desc: "ট্র্যাকিং আইডি" },
+  { tag: "{tracking_link}", desc: "ট্র্যাকিং লিঙ্ক" },
+];
 
 export default function EmailTemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [testEmail, setTestEmail] = useState("");
-  const [activeTab, setActiveTab] = useState<"confirmation" | "shipped" | "delivered" | "cancelled">("confirmation");
+  const [activeTab, setActiveTab] = useState<StatusKey>("confirmation");
+  const [previewHtmlModal, setPreviewHtmlModal] = useState<string | null>(null);
 
-  // Credentials & Settings State
+  // SMTP Settings
   const [gmailUser, setGmailUser] = useState("");
   const [gmailAppPassword, setGmailAppPassword] = useState("");
   const [adminNotificationEmail, setAdminNotificationEmail] = useState("");
 
-  // Template State
-  const [confirmationSubject, setConfirmationSubject] = useState("");
-  const [confirmationBody, setConfirmationBody] = useState("");
+  // Status Templates State (Simple Plain Text Only)
+  const [templates, setTemplates] = useState<{ [key: string]: string }>({
+    pendingSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_SUBJECT,
+    pendingBody: DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_BODY,
 
-  const [shippedSubject, setShippedSubject] = useState("");
-  const [shippedBody, setShippedBody] = useState("");
+    confirmationSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT,
+    confirmationBody: DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY,
 
-  const [deliveredSubject, setDeliveredSubject] = useState("");
-  const [deliveredBody, setDeliveredBody] = useState("");
+    processingSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_SUBJECT,
+    processingBody: DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_BODY,
 
-  const [cancelledSubject, setCancelledSubject] = useState("");
-  const [cancelledBody, setCancelledBody] = useState("");
+    shippedSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_SUBJECT,
+    shippedBody: DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_BODY,
+
+    deliveredSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_SUBJECT,
+    deliveredBody: DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_BODY,
+
+    cancelledSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_SUBJECT,
+    cancelledBody: DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_BODY,
+
+    returnedSubject: DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_SUBJECT,
+    returnedBody: DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_BODY,
+  });
 
   // Fetch Settings on Mount
   const fetchTemplates = async () => {
@@ -61,21 +199,32 @@ export default function EmailTemplatesPage() {
         setGmailAppPassword(d.GMAIL_APP_PASSWORD || "");
         setAdminNotificationEmail(d.ADMIN_NOTIFICATION_EMAIL || "");
 
-        setConfirmationSubject(d.EMAIL_ORDER_CONFIRMATION_SUBJECT);
-        setConfirmationBody(d.EMAIL_ORDER_CONFIRMATION_BODY);
+        setTemplates({
+          pendingSubject: d.EMAIL_ORDER_PENDING_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_SUBJECT,
+          pendingBody: d.EMAIL_ORDER_PENDING_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_PENDING_BODY,
 
-        setShippedSubject(d.EMAIL_ORDER_SHIPPED_SUBJECT);
-        setShippedBody(d.EMAIL_ORDER_SHIPPED_BODY);
+          confirmationSubject: d.EMAIL_ORDER_CONFIRMATION_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT,
+          confirmationBody: d.EMAIL_ORDER_CONFIRMATION_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY,
 
-        setDeliveredSubject(d.EMAIL_ORDER_DELIVERED_SUBJECT);
-        setDeliveredBody(d.EMAIL_ORDER_DELIVERED_BODY);
+          processingSubject: d.EMAIL_ORDER_PROCESSING_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_SUBJECT,
+          processingBody: d.EMAIL_ORDER_PROCESSING_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_PROCESSING_BODY,
 
-        setCancelledSubject(d.EMAIL_ORDER_CANCELLED_SUBJECT);
-        setCancelledBody(d.EMAIL_ORDER_CANCELLED_BODY);
+          shippedSubject: d.EMAIL_ORDER_SHIPPED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_SUBJECT,
+          shippedBody: d.EMAIL_ORDER_SHIPPED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_BODY,
+
+          deliveredSubject: d.EMAIL_ORDER_DELIVERED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_SUBJECT,
+          deliveredBody: d.EMAIL_ORDER_DELIVERED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_BODY,
+
+          cancelledSubject: d.EMAIL_ORDER_CANCELLED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_SUBJECT,
+          cancelledBody: d.EMAIL_ORDER_CANCELLED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_BODY,
+
+          returnedSubject: d.EMAIL_ORDER_RETURNED_SUBJECT || DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_SUBJECT,
+          returnedBody: d.EMAIL_ORDER_RETURNED_BODY || DEFAULT_EMAIL_TEMPLATES.ORDER_RETURNED_BODY,
+        });
       }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load email templates");
+      toast.error("ইমেইল টেমপ্লেট লোড করতে সমস্যা হয়েছে");
     } finally {
       setIsLoading(false);
     }
@@ -94,17 +243,26 @@ export default function EmailTemplatesPage() {
         GMAIL_APP_PASSWORD: gmailAppPassword,
         ADMIN_NOTIFICATION_EMAIL: adminNotificationEmail,
 
-        EMAIL_ORDER_CONFIRMATION_SUBJECT: confirmationSubject,
-        EMAIL_ORDER_CONFIRMATION_BODY: confirmationBody,
+        EMAIL_ORDER_PENDING_SUBJECT: templates.pendingSubject,
+        EMAIL_ORDER_PENDING_BODY: templates.pendingBody,
 
-        EMAIL_ORDER_SHIPPED_SUBJECT: shippedSubject,
-        EMAIL_ORDER_SHIPPED_BODY: shippedBody,
+        EMAIL_ORDER_CONFIRMATION_SUBJECT: templates.confirmationSubject,
+        EMAIL_ORDER_CONFIRMATION_BODY: templates.confirmationBody,
 
-        EMAIL_ORDER_DELIVERED_SUBJECT: deliveredSubject,
-        EMAIL_ORDER_DELIVERED_BODY: deliveredBody,
+        EMAIL_ORDER_PROCESSING_SUBJECT: templates.processingSubject,
+        EMAIL_ORDER_PROCESSING_BODY: templates.processingBody,
 
-        EMAIL_ORDER_CANCELLED_SUBJECT: cancelledSubject,
-        EMAIL_ORDER_CANCELLED_BODY: cancelledBody,
+        EMAIL_ORDER_SHIPPED_SUBJECT: templates.shippedSubject,
+        EMAIL_ORDER_SHIPPED_BODY: templates.shippedBody,
+
+        EMAIL_ORDER_DELIVERED_SUBJECT: templates.deliveredSubject,
+        EMAIL_ORDER_DELIVERED_BODY: templates.deliveredBody,
+
+        EMAIL_ORDER_CANCELLED_SUBJECT: templates.cancelledSubject,
+        EMAIL_ORDER_CANCELLED_BODY: templates.cancelledBody,
+
+        EMAIL_ORDER_RETURNED_SUBJECT: templates.returnedSubject,
+        EMAIL_ORDER_RETURNED_BODY: templates.returnedBody,
       };
 
       const res = await fetch("/api/admin/email/templates", {
@@ -115,21 +273,43 @@ export default function EmailTemplatesPage() {
 
       const json = await res.json();
       if (json.success) {
-        toast.success("Gmail credentials & email templates saved successfully!");
+        toast.success("সবগুলো স্ট্যাটাসের ইমেইল বার্তা সফলভাবে সেভ করা হয়েছে!");
       } else {
-        toast.error(json.error || "Failed to save settings");
+        toast.error(json.error || "সেভ করতে সমস্যা হয়েছে");
       }
     } catch (err: any) {
-      toast.error(err.message || "Error saving templates");
+      toast.error(err.message || "ত্রুটি ঘটেছে");
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Test Email Handler
+  // Insert placeholder into active field
+  const handleInsertPlaceholder = (tag: string, fieldKey: string) => {
+    setTemplates((prev) => ({
+      ...prev,
+      [fieldKey]: (prev[fieldKey] || "") + ` ${tag}`,
+    }));
+    toast.success(`ট্যাগ '${tag}' যুক্ত করা হয়েছে`);
+  };
+
+  // Reset current tab to default
+  const handleResetCurrent = () => {
+    const config = STATUS_CONFIGS.find((c) => c.key === activeTab);
+    if (config) {
+      setTemplates((prev) => ({
+        ...prev,
+        [config.subjectKey]: config.defaultSubject,
+        [config.bodyKey]: config.defaultBody,
+      }));
+      toast.success(`${config.label} এর ডিফল্ট বার্তা রিস্টোর করা হয়েছে`);
+    }
+  };
+
+  // Test Email Sender
   const handleSendTestEmail = async () => {
     if (!testEmail || !testEmail.includes("@")) {
-      toast.error("Please enter a valid email address for testing");
+      toast.error("পরীক্ষা করার জন্য একটি সঠিক ইমেইল দিন");
       return;
     }
 
@@ -139,342 +319,294 @@ export default function EmailTemplatesPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          recipients: [{ email: testEmail, name: "Test User" }],
+          recipients: [{ email: testEmail, name: "Test Admin" }],
           subject: "🧪 Test Email Notification (haqplus)",
-          bodyHtml: `<div style="font-family: Arial; padding: 20px;"><h2 style="color: #059669;">Gmail System Working!</h2><p>This is a test notification email from your <strong>haqplus</strong> e-commerce platform.</p></div>`,
+          bodyHtml: `<div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #10b981; border-radius: 8px;">
+            <h2 style="color: #059669;">Gmail Gateway Working Perfectly! 🎉</h2>
+            <p>আপনার haqplus স্টোরের জিমেইল অটোমেশন সিস্টেম সফলভাবে কাজ করছে।</p>
+          </div>`,
         }),
       });
 
       const json = await res.json();
       if (json.success && json.sentCount > 0) {
-        toast.success(`Test email sent successfully to ${testEmail}! Check your inbox.`);
+        toast.success(`টেস্ট ইমেইলটি সফলভাবে ${testEmail} ঠিকানায় পাঠানো হয়েছে!`);
       } else {
-        toast.error(json.error || json.errors?.[0] || "Failed to send test email. Check Gmail credentials.");
+        toast.error(json.error || "টেস্ট ইমেইল পাঠানো ব্যর্থ হয়েছে। জিমেইল অ্যাপ পাসওয়ার্ড চেক করুন।");
       }
     } catch (err: any) {
-      toast.error("Test email connection error");
+      toast.error(err.message || "টেস্ট ইমেইল পাঠাতে সমস্যা হয়েছে");
     } finally {
       setIsTesting(false);
     }
   };
 
-  // Reset Active Template to Default
-  const handleResetDefault = () => {
-    if (activeTab === "confirmation") {
-      setConfirmationSubject(DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_SUBJECT);
-      setConfirmationBody(DEFAULT_EMAIL_TEMPLATES.ORDER_CONFIRMATION_BODY);
-    } else if (activeTab === "shipped") {
-      setShippedSubject(DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_SUBJECT);
-      setShippedBody(DEFAULT_EMAIL_TEMPLATES.ORDER_SHIPPED_BODY);
-    } else if (activeTab === "delivered") {
-      setDeliveredSubject(DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_SUBJECT);
-      setDeliveredBody(DEFAULT_EMAIL_TEMPLATES.ORDER_DELIVERED_BODY);
-    } else if (activeTab === "cancelled") {
-      setCancelledSubject(DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_SUBJECT);
-      setCancelledBody(DEFAULT_EMAIL_TEMPLATES.ORDER_CANCELLED_BODY);
-    }
-    toast.success("Template reset to default values");
-  };
+  const activeConfig = STATUS_CONFIGS.find((c) => c.key === activeTab) || STATUS_CONFIGS[0];
 
   return (
-    <div className="space-y-6 max-w-6xl pb-16">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-0.5 text-xs font-bold mb-1">
-            <Mail className="size-3.5" />
-            <span>Email Management System</span>
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* Top Header Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-card border border-border/80 rounded-3xl p-6 shadow-xs">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600">
+              <Mail className="size-6" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground">
+                জিমেইল মেসেজ ও স্ট্যাটাস টেমপ্লেট
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                প্রতিটি স্ট্যাটাসের জন্য কাস্টম বার্তা ও টেক্সট নিজের মতো সেট করুন। কোনো কোডের প্রয়োজন নেই!
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Gmail SMTP & Custom Email Templates
-          </h1>
         </div>
 
-        <Button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2 shadow-sm"
-        >
-          {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
-          <span>Save All Settings & Templates</span>
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          <Button
+            variant="outline"
+            onClick={fetchTemplates}
+            disabled={isLoading}
+            className="rounded-2xl h-11 px-4 gap-2 text-xs font-semibold"
+          >
+            <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+            <span>রিফ্রেশ</span>
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="rounded-2xl h-11 px-6 gap-2 bg-[#0f6848] hover:bg-[#0b4e36] text-white text-xs font-bold shadow-md shadow-emerald-900/10"
+          >
+            {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+            <span>পরিবর্তন সেভ করুন</span>
+          </Button>
+        </div>
       </div>
 
-      {/* 1. Gmail Credentials Setup Card */}
-      <Card className="rounded-2xl border-border/80 shadow-2xs">
-        <CardHeader className="pb-3 border-b border-border/60">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="size-9 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Settings className="size-5" />
-              </div>
-              <div>
-                <CardTitle className="text-base font-bold">Gmail Sender Credentials & Admin Alert</CardTitle>
-                <CardDescription className="text-xs">Configure Gmail App Password for reliable automated delivery</CardDescription>
-              </div>
+      {/* Gmail Credentials Configuration Card */}
+      <Card className="rounded-3xl border-border/80 shadow-xs overflow-hidden">
+        <CardHeader className="bg-muted/30 border-b border-border/60 pb-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Settings className="size-5 text-emerald-600" />
+              <CardTitle className="text-base font-bold text-foreground">
+                জিমেইল SMTP অ্যান্ড সার্ভিস সেটিংস
+              </CardTitle>
             </div>
-
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-mono text-[11px]">
-              Gmail SMTP (Port 465/587)
+            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-200">
+              Active Transporter
             </Badge>
           </div>
+          <CardDescription className="text-xs text-muted-foreground">
+            আপনার জিমেইল এড্রেস এবং ১৬ অক্ষরের App Password সেট করে টেস্ট ইমেইল পাঠিয়ে যাচাই করুন।
+          </CardDescription>
         </CardHeader>
-        <CardContent className="pt-4 space-y-4">
+        <CardContent className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-foreground">Gmail Address (Sender) *</label>
+              <Label className="text-xs font-bold text-slate-700">জিমেইল এড্রেস (Sender Gmail)</Label>
               <Input
-                placeholder="yourbrand@gmail.com"
+                placeholder="yourshop@gmail.com"
                 value={gmailUser}
                 onChange={(e) => setGmailUser(e.target.value)}
-                className="rounded-xl text-xs font-mono"
+                className="h-11 rounded-xl text-xs font-mono"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-foreground">Gmail App Password *</label>
+              <Label className="text-xs font-bold text-slate-700">Google App Password (16-digit)</Label>
               <Input
                 type="password"
                 placeholder="xxxx xxxx xxxx xxxx"
                 value={gmailAppPassword}
                 onChange={(e) => setGmailAppPassword(e.target.value)}
-                className="rounded-xl text-xs font-mono"
+                className="h-11 rounded-xl text-xs font-mono"
               />
-              <span className="text-[10px] text-muted-foreground block">Google Account &gt; Security &gt; App Passwords</span>
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-foreground">Admin Alert Receiver Email</label>
+              <Label className="text-xs font-bold text-slate-700">এডমিন অ্যালার্ট রিসিভার ইমেইল</Label>
               <Input
-                placeholder="admin@yourbrand.com"
+                placeholder="admin@gmail.com"
                 value={adminNotificationEmail}
                 onChange={(e) => setAdminNotificationEmail(e.target.value)}
-                className="rounded-xl text-xs font-mono"
+                className="h-11 rounded-xl text-xs font-mono"
               />
-              <span className="text-[10px] text-muted-foreground block">Receives instant notifications for new orders</span>
             </div>
           </div>
 
-          {/* Test Email Section */}
-          <div className="pt-2 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Test Email Row */}
+          <div className="pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center gap-3">
+            <div className="relative w-full sm:w-80">
               <Input
-                placeholder="Enter email to test (e.g. test@gmail.com)"
+                placeholder="টেস্ট পাঠাতে নিজের ইমেইল লিখুন"
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
-                className="rounded-xl text-xs font-mono max-w-xs h-9"
+                className="h-10 rounded-xl text-xs pl-3 pr-10"
               />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleSendTestEmail}
-                disabled={isTesting}
-                className="rounded-xl text-xs font-bold gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 h-9"
-              >
-                {isTesting ? <RefreshCw className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
-                <span>Send Test Email</span>
-              </Button>
             </div>
-
-            <p className="text-[11px] text-muted-foreground">
-              💡 Need help generating a Gmail App Password? Go to Google Account Security.
-            </p>
+            <Button
+              onClick={handleSendTestEmail}
+              disabled={isTesting}
+              size="sm"
+              variant="outline"
+              className="rounded-xl h-10 px-4 gap-2 text-xs font-semibold w-full sm:w-auto"
+            >
+              {isTesting ? <RefreshCw className="size-3.5 animate-spin" /> : <Send className="size-3.5 text-emerald-600" />}
+              <span>টেস্ট ইমেইল পাঠান</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* 2. Custom Email Template Editor Card */}
-      <Card className="rounded-2xl border-border/80 shadow-2xs space-y-4">
-        <div className="p-4 border-b border-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="size-9 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-              <Sparkles className="size-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-foreground">Custom Email Template Editor</h3>
-              <p className="text-xs text-muted-foreground">Customize subjects and HTML message body for customer triggers</p>
-            </div>
-          </div>
-
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleResetDefault}
-            className="rounded-xl text-xs font-bold text-muted-foreground hover:text-foreground gap-1.5"
-          >
-            <RotateCcw className="size-3.5" />
-            <span>Reset Active Template to Default</span>
-          </Button>
+      {/* Main Status Selector Tabs */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+            <Sliders className="size-4 text-emerald-600" />
+            <span>অর্ডার স্ট্যাটাস অনুযায়ী ইমেইল বার্তা পরিবর্তন করুন ({STATUS_CONFIGS.length}টি)</span>
+          </h3>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="px-4">
-          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 pb-3">
-            <button
-              onClick={() => setActiveTab("confirmation")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "confirmation"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
-              }`}
-            >
-              <PackageCheck className="size-4" />
-              <span>1. Order Confirmation (অর্ডার কনফার্মেশন)</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("shipped")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "shipped"
-                  ? "bg-blue-600 text-white shadow-xs"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
-              }`}
-            >
-              <Truck className="size-4" />
-              <span>2. Order Shipped (শিপিং ও ট্র্যাকিং)</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("delivered")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "delivered"
-                  ? "bg-emerald-600 text-white shadow-xs"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
-              }`}
-            >
-              <CheckCircle2 className="size-4" />
-              <span>3. Order Delivered (ডেলিভারড)</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("cancelled")}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === "cancelled"
-                  ? "bg-rose-600 text-white shadow-xs"
-                  : "bg-muted/50 hover:bg-muted text-muted-foreground"
-              }`}
-            >
-              <XCircle className="size-4" />
-              <span>4. Order Cancelled (ক্যানসেলড)</span>
-            </button>
-          </div>
+        {/* Status Tab Navigation Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          {STATUS_CONFIGS.map((config) => {
+            const Icon = config.icon;
+            const isActive = activeTab === config.key;
+            return (
+              <button
+                key={config.key}
+                onClick={() => setActiveTab(config.key)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
+                  isActive
+                    ? "bg-[#0f6848] text-white border-[#0f6848] shadow-md shadow-emerald-900/10"
+                    : "bg-card text-slate-700 border-border/80 hover:bg-muted"
+                }`}
+              >
+                <Icon className="size-4" />
+                <span>{config.label.split(" (")[0]}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Active Template Editor */}
-        <div className="p-4 pt-0 space-y-4">
-          {/* Dynamic Placeholders Helper Box */}
-          <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-purple-700 dark:text-purple-300">
-              <HelpCircle className="size-4" />
-              <span>Available Dynamic Variables (কাস্টমাইজেশনের জন্য এই প্লেসহোল্ডারগুলো ব্যবহার করুন):</span>
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{customer_name}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{order_number}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{total_amount}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{payment_method}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{address}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{district}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{courier_name}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{tracking_code}`}</span>
-              <span className="bg-purple-500/20 px-2 py-0.5 rounded text-purple-700 dark:text-purple-200">{`{items_table}`}</span>
-            </div>
-          </div>
-
-          {/* Form Controls */}
-          {activeTab === "confirmation" && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email Subject Line *</label>
-                <Input
-                  value={confirmationSubject}
-                  onChange={(e) => setConfirmationSubject(e.target.value)}
-                  className="rounded-xl text-xs font-medium"
-                />
+        {/* Active Status Template Editor */}
+        <Card className="rounded-3xl border-border/80 shadow-xs overflow-hidden">
+          <CardHeader className="bg-muted/20 border-b border-border/60 pb-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-card border border-border shadow-xs text-emerald-600">
+                  <activeConfig.icon className="size-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-extrabold text-foreground">
+                    {activeConfig.label}
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    অর্ডারের স্ট্যাটাস পরিবর্তন হয়ে &quot;{activeConfig.badge}&quot; হলে এই ইমেইল বার্তাটি কাস্টমারের কাছে যাবে।
+                  </CardDescription>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email HTML Body Content *</label>
-                <Textarea
-                  value={confirmationBody}
-                  onChange={(e) => setConfirmationBody(e.target.value)}
-                  rows={14}
-                  className="rounded-xl text-xs font-mono leading-relaxed"
-                />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetCurrent}
+                  className="rounded-xl h-9 px-3 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <RotateCcw className="size-3.5" />
+                  <span>ডিফল্ট রিস্টোর</span>
+                </Button>
+
+                <Badge variant="outline" className={`px-3 py-1 font-mono text-xs font-bold ${activeConfig.badgeColor}`}>
+                  {activeConfig.badge}
+                </Badge>
               </div>
             </div>
-          )}
+          </CardHeader>
 
-          {activeTab === "shipped" && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email Subject Line *</label>
-                <Input
-                  value={shippedSubject}
-                  onChange={(e) => setShippedSubject(e.target.value)}
-                  className="rounded-xl text-xs font-medium"
-                />
+          <CardContent className="p-6 space-y-6">
+            {/* Subject Field */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-700 block">
+                ইমেইল সাবজেক্ট (Subject Line)
+              </Label>
+              <Input
+                value={templates[activeConfig.subjectKey] || ""}
+                onChange={(e) =>
+                  setTemplates((prev) => ({
+                    ...prev,
+                    [activeConfig.subjectKey]: e.target.value,
+                  }))
+                }
+                placeholder="ইমেইলের সাবজেক্ট লিখুন..."
+                className="h-12 rounded-xl text-sm font-semibold"
+              />
+            </div>
+
+            {/* Plain Text Message Body Field */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-bold text-slate-700 block">
+                  ইমেইল বার্তা / কাস্টম মেসেজ (Plain Text Message)
+                </Label>
+                <span className="text-xs text-emerald-600 font-medium">
+                  ✓ এইচটিএমএল কোডের কোনো দরকার নেই! সাধারণ টেক্সট লিখুন।
+                </span>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email HTML Body Content *</label>
-                <Textarea
-                  value={shippedBody}
-                  onChange={(e) => setShippedBody(e.target.value)}
-                  rows={14}
-                  className="rounded-xl text-xs font-mono leading-relaxed"
-                />
+              <Textarea
+                rows={8}
+                value={templates[activeConfig.bodyKey] || ""}
+                onChange={(e) =>
+                  setTemplates((prev) => ({
+                    ...prev,
+                    [activeConfig.bodyKey]: e.target.value,
+                  }))
+                }
+                placeholder="এখানে আপনার কাঙ্ক্ষিত বার্তাটি লিখুন..."
+                className="rounded-2xl p-4 text-sm font-sans leading-relaxed resize-y border border-slate-200/90 focus-visible:ring-[#0f6848]/20"
+              />
+            </div>
+
+            {/* Interactive Placeholder Badges Helper */}
+            <div className="pt-3 border-t border-border/60 space-y-2">
+              <span className="text-xs font-bold text-slate-600 block">
+                ডাইনামিক তথ্য বসাতে নিচের ট্যাগে ক্লিক করুন:
+              </span>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {PLACEHOLDERS.map((item) => (
+                  <button
+                    key={item.tag}
+                    type="button"
+                    onClick={() => handleInsertPlaceholder(item.tag, activeConfig.bodyKey)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:border-emerald-300 border border-slate-200 text-xs font-mono font-semibold text-slate-700 transition-all cursor-pointer"
+                  >
+                    <span>{item.tag}</span>
+                    <span className="text-[10px] text-slate-400 font-sans">({item.desc})</span>
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+          </CardContent>
+        </Card>
+      </div>
 
-          {activeTab === "delivered" && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email Subject Line *</label>
-                <Input
-                  value={deliveredSubject}
-                  onChange={(e) => setDeliveredSubject(e.target.value)}
-                  className="rounded-xl text-xs font-medium"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email HTML Body Content *</label>
-                <Textarea
-                  value={deliveredBody}
-                  onChange={(e) => setDeliveredBody(e.target.value)}
-                  rows={12}
-                  className="rounded-xl text-xs font-mono leading-relaxed"
-                />
-              </div>
-            </div>
-          )}
-
-          {activeTab === "cancelled" && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email Subject Line *</label>
-                <Input
-                  value={cancelledSubject}
-                  onChange={(e) => setCancelledSubject(e.target.value)}
-                  className="rounded-xl text-xs font-medium"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-foreground block">Email HTML Body Content *</label>
-                <Textarea
-                  value={cancelledBody}
-                  onChange={(e) => setCancelledBody(e.target.value)}
-                  rows={12}
-                  className="rounded-xl text-xs font-mono leading-relaxed"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
+      {/* Save Floating Bar */}
+      <div className="pt-4 flex justify-end">
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="rounded-2xl h-12 px-8 gap-2 bg-[#0f6848] hover:bg-[#0b4e36] text-white text-sm font-bold shadow-lg shadow-emerald-950/15"
+        >
+          {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+          <span>সমস্ত ইমেইল বার্তা সেভ করুন</span>
+        </Button>
+      </div>
     </div>
   );
 }
