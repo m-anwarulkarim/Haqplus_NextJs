@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { prisma } from "@/lib/prisma";
 
 export interface StoredOrderItem {
@@ -62,35 +60,54 @@ export interface StoredOrder {
   updatedAt: string;
 }
 
-const ORDERS_FILE = path.join(process.cwd(), "data", "orders.json");
+let inMemoryOrdersCache: StoredOrder[] = [];
 
-function ensureOrdersFile() {
-  const dir = path.dirname(ORDERS_FILE);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  if (!fs.existsSync(ORDERS_FILE)) {
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2), "utf-8");
+function getOrdersFilePath() {
+  try {
+    const path = require("path");
+    return path.join(process.cwd(), "data", "orders.json");
+  } catch (e) {
+    return null;
   }
 }
 
 function readOrdersFromFile(): StoredOrder[] {
   try {
-    ensureOrdersFile();
-    const data = fs.readFileSync(ORDERS_FILE, "utf-8");
-    return JSON.parse(data) || [];
+    const fs = require("fs");
+    const path = require("path");
+    const filePath = getOrdersFilePath();
+    if (!filePath || !fs.existsSync) return inMemoryOrdersCache;
+
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, "utf-8");
+      inMemoryOrdersCache = JSON.parse(data) || [];
+      return inMemoryOrdersCache;
+    }
   } catch (err) {
-    console.warn("Could not read orders from JSON fallback:", err);
-    return [];
+    // Edge/serverless fallback to memory cache
   }
+  return inMemoryOrdersCache;
 }
 
 function writeOrdersToFile(orders: StoredOrder[]) {
+  inMemoryOrdersCache = orders;
   try {
-    ensureOrdersFile();
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2), "utf-8");
+    const fs = require("fs");
+    const path = require("path");
+    const filePath = getOrdersFilePath();
+    if (!filePath || !fs.writeFileSync) return;
+
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, JSON.stringify(orders, null, 2), "utf-8");
   } catch (err) {
-    console.warn("Could not write orders to JSON fallback:", err);
+    // Ignore disk write errors on serverless/Edge
   }
 }
 

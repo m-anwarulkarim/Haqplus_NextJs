@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
 import { auth } from "@/lib/auth";
+import { getResilientSetting, setResilientSetting } from "@/lib/settings-store";
 
 export interface HeroSlide {
   id: string;
@@ -77,28 +76,16 @@ const DEFAULT_SLIDES: HeroSlide[] = [
   },
 ];
 
-const SLIDERS_FILE = path.join(process.cwd(), ".data", "hero_sliders.json");
-
-function getSlidersFromFile(): HeroSlide[] {
-  try {
-    const dir = path.dirname(SLIDERS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-    if (fs.existsSync(SLIDERS_FILE)) {
-      const fileData = fs.readFileSync(SLIDERS_FILE, "utf-8");
-      const parsed = JSON.parse(fileData);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch (err) {
-    console.error("Error reading hero_sliders.json:", err);
-  }
-  return DEFAULT_SLIDES;
-}
-
 export async function GET() {
   try {
-    const slides = getSlidersFromFile();
-    return NextResponse.json({ slides });
+    const raw = await getResilientSetting("HERO_SLIDERS");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return NextResponse.json({ slides: parsed });
+      }
+    }
+    return NextResponse.json({ slides: DEFAULT_SLIDES });
   } catch (error) {
     console.error("Hero sliders GET error:", error);
     return NextResponse.json({ slides: DEFAULT_SLIDES });
@@ -118,10 +105,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "slides must be an array" }, { status: 400 });
     }
 
-    const dir = path.dirname(SLIDERS_FILE);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-    fs.writeFileSync(SLIDERS_FILE, JSON.stringify(slides, null, 2), "utf-8");
+    await setResilientSetting("HERO_SLIDERS", JSON.stringify(slides));
 
     return NextResponse.json({ message: "Hero sliders saved successfully", slides });
   } catch (error: any) {

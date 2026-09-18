@@ -1,19 +1,24 @@
 import { prisma } from "@/lib/prisma";
-import fs from "fs";
-import path from "path";
 
 // Memory & file store fallback
 const memorySettingsStore = new Map<string, string>();
-const SETTINGS_FILE_PATH = path.join(process.cwd(), ".data", "settings.json");
 
-// Ensure .data directory exists
-try {
-  const dir = path.dirname(SETTINGS_FILE_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+function getSettingsFilePath() {
+  try {
+    const path = require("path");
+    return path.join(process.cwd(), ".data", "settings.json");
+  } catch (e) {
+    return null;
   }
-  if (fs.existsSync(SETTINGS_FILE_PATH)) {
-    const raw = fs.readFileSync(SETTINGS_FILE_PATH, "utf-8");
+}
+
+// Safely load file store on Node runtimes
+try {
+  const fs = require("fs");
+  const path = require("path");
+  const filePath = getSettingsFilePath();
+  if (filePath && fs.existsSync && fs.existsSync(filePath)) {
+    const raw = fs.readFileSync(filePath, "utf-8");
     const parsed = JSON.parse(raw);
     for (const [k, v] of Object.entries(parsed)) {
       if (typeof v === "string") {
@@ -22,12 +27,17 @@ try {
     }
   }
 } catch (e) {
-  // Ignore filesystem initialization errors
+  // Ignore filesystem initialization errors in Edge / serverless
 }
 
 function persistToFile() {
   try {
-    const dir = path.dirname(SETTINGS_FILE_PATH);
+    const fs = require("fs");
+    const path = require("path");
+    const filePath = getSettingsFilePath();
+    if (!filePath || !fs.writeFileSync) return;
+
+    const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -35,9 +45,9 @@ function persistToFile() {
     memorySettingsStore.forEach((value, key) => {
       obj[key] = value;
     });
-    fs.writeFileSync(SETTINGS_FILE_PATH, JSON.stringify(obj, null, 2), "utf-8");
+    fs.writeFileSync(filePath, JSON.stringify(obj, null, 2), "utf-8");
   } catch (e) {
-    console.error("Failed to persist settings to file:", e);
+    // Ignore file write errors on read-only / serverless filesystems
   }
 }
 

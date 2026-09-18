@@ -1,22 +1,22 @@
 import nodemailer from "nodemailer";
-import fs from "fs";
-import path from "path";
 import { DEFAULT_EMAIL_TEMPLATES } from "./email-templates-default";
 
 export { DEFAULT_EMAIL_TEMPLATES };
 
 const DEFAULT_SHOP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://haqplus-next-js-h7fj.vercel.app";
 
-// Function to read settings from .data/settings.json
-function getSettings() {
+// Function to read settings from env or safe file store fallback
+function getSettings(): Record<string, string> {
   try {
+    const fs = require("fs");
+    const path = require("path");
     const filePath = path.join(process.cwd(), ".data", "settings.json");
-    if (fs.existsSync(filePath)) {
+    if (fs.existsSync && fs.existsSync(filePath)) {
       const fileData = fs.readFileSync(filePath, "utf-8");
       return JSON.parse(fileData);
     }
   } catch (err) {
-    console.error("Error reading settings.json for email service:", err);
+    // Ignore filesystem error on Edge/Cloudflare runtimes
   }
   return {};
 }
