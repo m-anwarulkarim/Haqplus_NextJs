@@ -72,12 +72,15 @@ export async function POST(req: Request) {
     return NextResponse.json(newCategory, { status: 201 });
   } catch (error: any) {
     console.error("Category create error:", error);
-    if (error.code === "P2002") {
+    if (error?.code === "P2002") {
       return NextResponse.json(
         { error: "A category with this slug already exists" },
         { status: 409 }
       );
     }
-    return NextResponse.json({ error: "Failed to create category" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Failed to create category" },
+      { status: 500 }
+    );
   }
 }
