@@ -929,7 +929,7 @@ export default function AdminApiIntegrationsPage() {
               <div>
                 <DialogTitle>Meta Pixel & Conversions API (CAPI)</DialogTitle>
                 <DialogDescription className="text-xs">
-                  Meta Graph API v19.0 server-side tracking, GA4, and Tag Manager.
+                  Meta Graph API v19.0 server-side tracking & Conversions API.
                 </DialogDescription>
               </div>
             </div>
@@ -991,34 +991,21 @@ export default function AdminApiIntegrationsPage() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="ga4Id" className="text-xs font-semibold">
-                  GA4 Measurement ID
-                </Label>
-                <Input
-                  id="ga4Id"
-                  name="ga4Id"
-                  placeholder="G-XXXXXXXXXX"
-                  value={formData.ga4Id}
-                  onChange={handleChange}
-                  className="rounded-xl font-mono text-xs"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="gtmId" className="text-xs font-semibold">
-                  GTM ID
-                </Label>
-                <Input
-                  id="gtmId"
-                  name="gtmId"
-                  placeholder="GTM-XXXXXXX"
-                  value={formData.gtmId}
-                  onChange={handleChange}
-                  className="rounded-xl font-mono text-xs"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="metaTestEventCode" className="text-xs font-semibold">
+                Meta Test Event Code (Optional)
+              </Label>
+              <Input
+                id="metaTestEventCode"
+                name="metaTestEventCode"
+                placeholder="TEST12345"
+                value={formData.metaTestEventCode || ""}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Found in Meta Events Manager &gt; Test Events tab.
+              </p>
             </div>
           </div>
 

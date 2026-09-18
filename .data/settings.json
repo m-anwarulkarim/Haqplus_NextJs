@@ -34,5 +34,17 @@
   "EMAIL_ORDER_DELIVERED_SUBJECT": "আপনার অর্ডার সফলভাবে ডেলিভারি সম্পন্ন হয়েছে! (haqplus)",
   "EMAIL_ORDER_DELIVERED_BODY": "প্রিয় {customer_name},\n\nআপনার অর্ডার #{order_number} সফলভাবে আপনার হাতে পৌঁছে দেওয়া হয়েছে!\n\nআমাদের শ্রীমঙ্গলের ১০০% খাঁটি অর্গানিক চা পাতা উপভোগ করুন। চায়ের স্বাদ কেমন লেগেছে তা আমাদের পেজে রিভিউ দিয়ে জানাতে ভুলবেন না।\n\nধন্যবাদ,\nhaqplus Organic Tea",
   "EMAIL_ORDER_CANCELLED_SUBJECT": "অর্ডার বাতিল সংক্রান্ত নোটিশ - #{order_number}",
-  "EMAIL_ORDER_CANCELLED_BODY": "প্রিয় {customer_name},\n\nআপনার অর্ডার #{order_number} টি অনিবার্য কারণে বাতিল করা হয়েছে। \n\nযদি কোনো ভুল বোঝাবুঝি হয়ে থাকে অথবা পুনরায় অর্ডারটি সচল করতে চান, তবে অনুগ্রহ করে আমাদের হটলাইনে যোগাযোগ করুন।\n\nধন্যবাদ,\nhaqplus Organic Tea"
+  "EMAIL_ORDER_CANCELLED_BODY": "প্রিয় {customer_name},\n\nআপনার অর্ডার #{order_number} টি অনিবার্য কারণে বাতিল করা হয়েছে। \n\nযদি কোনো ভুল বোঝাবুঝি হয়ে থাকে অথবা পুনরায় অর্ডারটি সচল করতে চান, তবে অনুগ্রহ করে আমাদের হটলাইনে যোগাযোগ করুন।\n\nধন্যবাদ,\nhaqplus Organic Tea",
+  "GOOGLE_CLIENT_ID": "",
+  "GOOGLE_CLIENT_SECRET": "",
+  "FIREBASE_PROJECT_ID": "",
+  "FIREBASE_CLIENT_EMAIL": "",
+  "FIREBASE_PRIVATE_KEY": "",
+  "NEXT_PUBLIC_FIREBASE_VAPID_KEY": "",
+  "NEXT_PUBLIC_FIREBASE_API_KEY": "",
+  "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID": "",
+  "NEXT_PUBLIC_FIREBASE_APP_ID": "",
+  "GA4_ID": "",
+  "GTM_ID": "",
+  "META_PIXEL_ID": ""
 }

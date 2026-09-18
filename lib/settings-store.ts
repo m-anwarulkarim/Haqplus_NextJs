@@ -107,7 +107,7 @@ export async function setResilientSetting(key: string, value: string): Promise<v
       create: { key, value },
     });
   } catch (e) {
-    // DB unavailable, file/memory store is active
+    console.warn(`[SettingsStore] Database write failed for key "${key}":`, e);
   }
 }
 
@@ -123,7 +123,7 @@ export async function setBulkResilientSettings(settingsMap: Record<string, any>)
           create: { key, value: valStr },
         });
       } catch (e) {
-        // Ignore DB error
+        console.warn(`[SettingsStore] Database write failed for bulk key "${key}":`, e);
       }
     }
   }
