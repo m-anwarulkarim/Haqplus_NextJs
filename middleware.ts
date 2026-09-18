@@ -2,10 +2,10 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 /**
- * Next.js 16 Proxy / Middleware for route protection.
+ * Edge Middleware for route protection.
  * Protects /admin routes ensuring only users with ADMIN role have access.
  */
-export const proxy = auth((req) => {
+export const middleware = auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
   const userRole = req.auth?.user?.role;
@@ -27,7 +27,7 @@ export const proxy = auth((req) => {
   return NextResponse.next();
 });
 
-export default proxy;
+export default middleware;
 
 export const config = {
   matcher: [
