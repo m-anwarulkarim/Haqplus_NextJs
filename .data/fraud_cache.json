@@ -20,5 +20,93 @@
       "cacheAgeDays": 0
     },
     "timestamp": 1789479934411
+  },
+  "01744101501": {
+    "data": {
+      "success": true,
+      "phone": "01744101501",
+      "total_parcel": 49,
+      "success_parcel": 48,
+      "cancelled_parcel": 1,
+      "success_rate": 98,
+      "risk_level": "MODERATE",
+      "message": null,
+      "raw": {
+        "total_parcels": 49,
+        "total_delivered": 48,
+        "total_cancelled": 1,
+        "total_fraud_reports": []
+      },
+      "cached": false,
+      "cachedAt": "2026-09-18T13:03:25.154Z",
+      "cacheAgeDays": 0
+    },
+    "timestamp": 1789736605154
+  },
+  "01915140153": {
+    "data": {
+      "success": true,
+      "phone": "01915140153",
+      "total_parcel": 468,
+      "success_parcel": 459,
+      "cancelled_parcel": 9,
+      "success_rate": 98.1,
+      "risk_level": "HIGH_RISK",
+      "message": null,
+      "raw": {
+        "total_parcels": 468,
+        "total_delivered": 459,
+        "total_cancelled": 9,
+        "total_fraud_reports": []
+      },
+      "cached": false,
+      "cachedAt": "2026-09-18T13:03:46.597Z",
+      "cacheAgeDays": 0
+    },
+    "timestamp": 1789736626597
+  },
+  "01610160295": {
+    "data": {
+      "success": true,
+      "phone": "01610160295",
+      "total_parcel": 3,
+      "success_parcel": 1,
+      "cancelled_parcel": 2,
+      "success_rate": 33.3,
+      "risk_level": "HIGH_RISK",
+      "message": null,
+      "raw": {
+        "total_parcels": 3,
+        "total_delivered": 1,
+        "total_cancelled": 2,
+        "total_fraud_reports": []
+      },
+      "cached": false,
+      "cachedAt": "2026-09-18T13:09:21.341Z",
+      "cacheAgeDays": 0
+    },
+    "timestamp": 1789736961341
+  },
+  "01300000000": {
+    "data": {
+      "success": true,
+      "phone": "01300000000",
+      "total_parcel": 26,
+      "success_parcel": 5,
+      "cancelled_parcel": 21,
+      "success_rate": 19.2,
+      "risk_level": "HIGH_RISK",
+      "message": null,
+      "raw": {
+        "total_parcels": 26,
+        "total_delivered": 5,
+        "total_cancelled": 21,
+        "total_fraud_reports": []
+      },
+      "cached": false,
+      "cachedAt": "2026-09-18T13:13:12.362Z",
+      "cacheAgeDays": 0
+    },
+    "timestamp": 1789737192362
   }
 }

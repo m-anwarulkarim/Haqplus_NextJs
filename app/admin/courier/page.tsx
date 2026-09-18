@@ -405,6 +405,40 @@ export default function AdminCourierHubPage() {
           </div>
         </div>
 
+        {/* Courier Selector Tabs: Steadfast vs Pathao */}
+        <div className="flex items-center gap-2 pt-1 pb-1">
+          <button
+            type="button"
+            onClick={() => {
+              setFraudCourier("steadfast");
+              setFraudResult(null);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              fraudCourier === "steadfast"
+                ? "bg-purple-600 text-white shadow-xs"
+                : "bg-muted dark:bg-slate-800 text-muted-foreground hover:text-foreground border border-border/60"
+            }`}
+          >
+            <span className="size-2 rounded-full bg-purple-300" />
+            <span>Steadfast Fraud Check</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setFraudCourier("pathao");
+              setFraudResult(null);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+              fraudCourier === "pathao"
+                ? "bg-red-600 text-white shadow-xs"
+                : "bg-muted dark:bg-slate-800 text-muted-foreground hover:text-foreground border border-border/60"
+            }`}
+          >
+            <span className="size-2 rounded-full bg-red-300" />
+            <span>Pathao Fraud Check</span>
+          </button>
+        </div>
+
         <form onSubmit={handleCheckFraud} className="flex gap-2">
           <Input
             placeholder={`Enter customer phone number for ${fraudCourier === "pathao" ? "Pathao" : "Steadfast"} check (e.g. 01712345678)`}
@@ -416,7 +450,7 @@ export default function AdminCourierHubPage() {
             type="submit"
             disabled={isCheckingFraud}
             size="sm"
-            className={`rounded-xl font-bold gap-1.5 shrink-0 shadow-xs px-5 text-white ${
+            className={`rounded-xl font-bold gap-1.5 shrink-0 shadow-xs px-5 text-white cursor-pointer ${
               fraudCourier === "pathao" ? "bg-red-600 hover:bg-red-700" : "bg-purple-600 hover:bg-purple-700"
             }`}
           >

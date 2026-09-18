@@ -62,9 +62,11 @@ export default function AdminOrderDetailPage() {
   const [isBanned, setIsBanned] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
 
-  // Steadfast Fraud Check State
+  // Steadfast & Pathao Fraud Check State
   const [steadfastFraudData, setSteadfastFraudData] = useState<any>(null);
   const [isCheckingSteadfastFraud, setIsCheckingSteadfastFraud] = useState(false);
+  const [pathaoFraudData, setPathaoFraudData] = useState<any>(null);
+  const [isCheckingPathaoFraud, setIsCheckingPathaoFraud] = useState(false);
 
   const handleCheckSteadfastFraud = async (force = false) => {
     const targetPhone = phone || order?.phone;
@@ -92,6 +94,31 @@ export default function AdminOrderDetailPage() {
       toast.error("Error checking Steadfast fraud database");
     } finally {
       setIsCheckingSteadfastFraud(false);
+    }
+  };
+
+  const handleCheckPathaoFraud = async () => {
+    const targetPhone = phone || order?.phone;
+    if (!targetPhone) {
+      toast.error("Phone number is required");
+      return;
+    }
+    setIsCheckingPathaoFraud(true);
+    try {
+      const url = `/api/courier/pathao/fraud-check?phone=${encodeURIComponent(targetPhone)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setPathaoFraudData(data);
+      if (res.ok && data.success) {
+        toast.success(`Pathao Fraud Check complete for ${targetPhone}`);
+      } else {
+        toast.error(data.error || "Failed to fetch Pathao fraud data");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Error checking Pathao fraud database");
+    } finally {
+      setIsCheckingPathaoFraud(false);
     }
   };
 
@@ -1137,6 +1164,75 @@ export default function AdminOrderDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Pathao Live API Record Section */}
+                <div className="pt-2 border-t border-border/60">
+                  <div className="flex items-center justify-between text-[10px] uppercase mb-1">
+                    <span className="text-muted-foreground font-semibold flex items-center gap-1">
+                      <span className="size-1.5 rounded-full bg-red-500" /> Pathao Courier Record
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCheckPathaoFraud}
+                      disabled={isCheckingPathaoFraud}
+                      className="text-red-600 dark:text-red-400 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      {isCheckingPathaoFraud ? <RefreshCw className="size-3 animate-spin" /> : <Search className="size-3" />}
+                      <span>{pathaoFraudData ? "Re-Check" : "Check Pathao"}</span>
+                    </button>
+                  </div>
+
+                  {pathaoFraudData ? (
+                    <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/25 space-y-1.5 font-mono text-[11px]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Phone: {pathaoFraudData.phone}</span>
+                        <span className={`px-2 py-0.2 rounded text-[10px] font-extrabold ${
+                          pathaoFraudData.risk_level === "SAFE"
+                            ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                            : pathaoFraudData.risk_level === "HIGH_RISK"
+                            ? "bg-rose-500/20 text-rose-600 dark:text-rose-400"
+                            : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                        }`}>
+                          {pathaoFraudData.risk_level}
+                        </span>
+                      </div>
+
+                      {pathaoFraudData.is_pathao_connected ? (
+                        <>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>Total: <strong>{pathaoFraudData.total_parcel}</strong></span>
+                            <span>Success: <strong className="text-emerald-600 dark:text-emerald-400">{pathaoFraudData.success_parcel}</strong></span>
+                            <span>Cancel: <strong className="text-rose-600 dark:text-rose-400">{pathaoFraudData.cancelled_parcel}</strong></span>
+                          </div>
+
+                          <div className="w-full bg-muted dark:bg-slate-800 rounded-full h-1.5 overflow-hidden flex">
+                            <div className="bg-emerald-500 h-full" style={{ width: `${Math.min(pathaoFraudData.success_rate, 100)}%` }} />
+                            <div className="bg-rose-500 h-full" style={{ width: `${Math.max(0, 100 - pathaoFraudData.success_rate)}%` }} />
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-[10px] text-amber-600 dark:text-amber-400 font-sans leading-tight">
+                          ⚠️ {pathaoFraudData.note || "Pathao Merchant API is not connected."}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-1 font-mono">
+                      <div className="flex items-center justify-between bg-muted/40 p-2 rounded-md border border-border dark:border-slate-800/60">
+                        <span className="text-foreground dark:text-slate-300 flex items-center gap-1">
+                          <span className="size-1.5 rounded-full bg-red-500" /> Pathao Network
+                        </span>
+                        <button
+                          onClick={handleCheckPathaoFraud}
+                          disabled={isCheckingPathaoFraud}
+                          className="text-[10px] font-bold text-red-600 dark:text-red-400 hover:underline"
+                        >
+                          {isCheckingPathaoFraud ? "Checking..." : "Click to Check Pathao"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
