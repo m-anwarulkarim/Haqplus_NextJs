@@ -1,31 +1,33 @@
 import Script from "next/script";
-import { prisma } from "@/lib/prisma";
+import { getResilientSetting } from "@/lib/settings-store";
 
 export async function TrackingScripts() {
-  let pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-  let ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
-  let gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const pixelId =
+    (await getResilientSetting("META_PIXEL_ID")) ||
+    (await getResilientSetting("metaPixelId")) ||
+    process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-  try {
-    const settings = await prisma.setting.findMany({
-      where: {
-        key: {
-          in: ["META_PIXEL_ID", "GA4_ID", "GTM_ID"],
-        },
-      },
-    });
+  const ga4Id =
+    (await getResilientSetting("GA4_ID")) ||
+    (await getResilientSetting("ga4Id")) ||
+    process.env.NEXT_PUBLIC_GA4_ID;
 
-    for (const setting of settings) {
-      if (setting.key === "META_PIXEL_ID" && setting.value) pixelId = setting.value;
-      if (setting.key === "GA4_ID" && setting.value) ga4Id = setting.value;
-      if (setting.key === "GTM_ID" && setting.value) gtmId = setting.value;
-    }
-  } catch {
-    // Suppress if DB is initializing or offline
-  }
+  const gtmId =
+    (await getResilientSetting("GTM_ID")) ||
+    (await getResilientSetting("gtmId")) ||
+    process.env.NEXT_PUBLIC_GTM_ID;
+
+  const googleVerification =
+    (await getResilientSetting("googleVerification")) ||
+    (await getResilientSetting("GOOGLE_VERIFICATION"));
 
   return (
     <>
+      {/* Google Site Verification */}
+      {googleVerification && (
+        <meta name="google-site-verification" content={googleVerification} />
+      )}
+
       {/* Google Analytics 4 (GA4) */}
       {ga4Id && (
         <>
@@ -48,15 +50,25 @@ export async function TrackingScripts() {
 
       {/* Google Tag Manager (GTM) */}
       {gtmId && (
-        <Script id="gtm-init" strategy="afterInteractive">
-          {`
-            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-            })(window,document,'script','dataLayer','${gtmId}');
-          `}
-        </Script>
+        <>
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','${gtmId}');
+            `}
+          </Script>
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            />
+          </noscript>
+        </>
       )}
 
       {/* Meta Pixel (Facebook Pixel) */}

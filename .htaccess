@@ -1,0 +1,16 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppType node
+PassengerStartupFile server.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
+Options -Indexes
+
+<Files ".env">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>

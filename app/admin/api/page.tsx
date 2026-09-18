@@ -20,6 +20,9 @@ import {
   Check,
   RotateCcw,
   Link2,
+  BarChart3,
+  KeyRound,
+  Flame,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +41,7 @@ const DEFAULT_WEBHOOK_TOKEN = "cea049f22c9296708185a89bbe3c17b57039bf61f0ab9eb14
 
 export default function AdminApiIntegrationsPage() {
   const [activeModal, setActiveModal] = useState<
-    "courier" | "pathao" | "sms" | "fraud" | "meta" | "notifications" | null
+    "courier" | "pathao" | "sms" | "fraud" | "meta" | "google" | "google_oauth" | "firebase" | "notifications" | null
   >(null);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +83,19 @@ export default function AdminApiIntegrationsPage() {
     gtmId: "",
     googleVerification: "",
 
+    // Google OAuth Credentials
+    GOOGLE_CLIENT_ID: "",
+    GOOGLE_CLIENT_SECRET: "",
+
+    // Firebase Client & Admin SDK Config
+    FIREBASE_PROJECT_ID: "",
+    FIREBASE_CLIENT_EMAIL: "",
+    FIREBASE_PRIVATE_KEY: "",
+    NEXT_PUBLIC_FIREBASE_VAPID_KEY: "",
+    NEXT_PUBLIC_FIREBASE_API_KEY: "",
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "",
+    NEXT_PUBLIC_FIREBASE_APP_ID: "",
+
     // SMS Templates
     smsOrderPlacedTemplate: "প্রিয় {name}, haqplus এ আপনার অর্ডার #{order_id} সফল হয়েছে। মোট: ৳{total}।",
     smsOrderShippedTemplate: "প্রিয় {name}, আপনার অর্ডার #{order_id} কুরিয়ারে পাঠানো হয়েছে। ট্র্যাকিং ID: {tracking_id}।",
@@ -87,10 +103,12 @@ export default function AdminApiIntegrationsPage() {
 
   // Dynamic origin for callback url
   const [callbackUrl, setCallbackUrl] = useState("https://haqplus.com/api/webhook/steadfast");
+  const [googleAuthCallbackUrl, setGoogleAuthCallbackUrl] = useState("https://haqplus.com/api/auth/callback/google");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCallbackUrl(`${window.location.origin}/api/webhook/steadfast`);
+      setGoogleAuthCallbackUrl(`${window.location.origin}/api/auth/callback/google`);
     }
   }, []);
 
@@ -119,12 +137,21 @@ export default function AdminApiIntegrationsPage() {
           PATHAO_USERNAME: data.PATHAO_USERNAME || prev.PATHAO_USERNAME,
           PATHAO_PASSWORD: data.PATHAO_PASSWORD || prev.PATHAO_PASSWORD,
           PATHAO_BASE_URL: data.PATHAO_BASE_URL || prev.PATHAO_BASE_URL,
-          metaPixelId: data.metaPixelId || prev.metaPixelId,
+          metaPixelId: data.metaPixelId || data.META_PIXEL_ID || prev.metaPixelId,
           metaAccessToken: data.metaAccessToken || prev.metaAccessToken,
           metaTestEventCode: data.metaTestEventCode || prev.metaTestEventCode,
-          ga4Id: data.ga4Id || prev.ga4Id,
-          gtmId: data.gtmId || prev.gtmId,
+          ga4Id: data.ga4Id || data.GA4_ID || prev.ga4Id,
+          gtmId: data.gtmId || data.GTM_ID || prev.gtmId,
           googleVerification: data.googleVerification || prev.googleVerification,
+          GOOGLE_CLIENT_ID: data.GOOGLE_CLIENT_ID || prev.GOOGLE_CLIENT_ID,
+          GOOGLE_CLIENT_SECRET: data.GOOGLE_CLIENT_SECRET || prev.GOOGLE_CLIENT_SECRET,
+          FIREBASE_PROJECT_ID: data.FIREBASE_PROJECT_ID || data.NEXT_PUBLIC_FIREBASE_PROJECT_ID || prev.FIREBASE_PROJECT_ID,
+          FIREBASE_CLIENT_EMAIL: data.FIREBASE_CLIENT_EMAIL || prev.FIREBASE_CLIENT_EMAIL,
+          FIREBASE_PRIVATE_KEY: data.FIREBASE_PRIVATE_KEY || prev.FIREBASE_PRIVATE_KEY,
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY: data.NEXT_PUBLIC_FIREBASE_VAPID_KEY || prev.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+          NEXT_PUBLIC_FIREBASE_API_KEY: data.NEXT_PUBLIC_FIREBASE_API_KEY || prev.NEXT_PUBLIC_FIREBASE_API_KEY,
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: data.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || prev.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+          NEXT_PUBLIC_FIREBASE_APP_ID: data.NEXT_PUBLIC_FIREBASE_APP_ID || prev.NEXT_PUBLIC_FIREBASE_APP_ID,
         }));
       }
     } catch (err) {
@@ -172,10 +199,17 @@ export default function AdminApiIntegrationsPage() {
   const handleSaveSettings = async (apiTitle: string) => {
     setIsSaving(true);
     try {
+      const payloadToSave = {
+        ...formData,
+        GA4_ID: formData.ga4Id,
+        GTM_ID: formData.gtmId,
+        META_PIXEL_ID: formData.metaPixelId,
+      };
+
       const res = await fetch("/api/settings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payloadToSave),
       });
 
       if (!res.ok) {
@@ -302,6 +336,30 @@ export default function AdminApiIntegrationsPage() {
       icon: Activity,
       active: Boolean(formData.metaPixelId && formData.metaAccessToken),
       highlight: false,
+    },
+    {
+      id: "google" as const,
+      name: "Google Tag Manager & GA4",
+      description: "Google Tag Manager (GTM) & Analytics 4 (GA4) setup",
+      icon: BarChart3,
+      active: Boolean(formData.gtmId || formData.ga4Id),
+      highlight: false,
+    },
+    {
+      id: "google_oauth" as const,
+      name: "Google OAuth 2.0 Credentials",
+      description: "Google Client ID & Secret for 'Continue with Google' login",
+      icon: KeyRound,
+      active: Boolean(formData.GOOGLE_CLIENT_ID && formData.GOOGLE_CLIENT_SECRET),
+      highlight: false,
+    },
+    {
+      id: "firebase" as const,
+      name: "Firebase & Push Notifications",
+      description: "Firebase Web Push Keys (Client) & Admin SDK Service Account",
+      icon: Flame,
+      active: Boolean(formData.FIREBASE_PROJECT_ID || formData.FIREBASE_CLIENT_EMAIL),
+      highlight: true,
     },
     {
       id: "notifications" as const,
@@ -984,6 +1042,317 @@ export default function AdminApiIntegrationsPage() {
             >
               {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
               <span>Save Meta Settings</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 4b: Google Tag Manager & GA4 */}
+      <Dialog open={activeModal === "google"} onOpenChange={(open) => !open && setActiveModal(null)}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
+                <BarChart3 className="size-5" />
+              </div>
+              <div>
+                <DialogTitle>Google Tag Manager & GA4 Analytics</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Set up Google Tag Manager (GTM), GA4 Measurement ID, and Search Console.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3.5 rounded-xl bg-[#CBB8DB]/15 border border-[#CBB8DB]/30 flex items-start gap-2 text-xs leading-relaxed text-foreground">
+              <CheckCircle2 className="size-4 text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">No .env File Edit Needed!</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Save your credentials here. Tracking scripts automatically load on your live website storefront for all visitors immediately.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="gtmId" className="text-xs font-semibold">
+                Google Tag Manager (GTM) ID
+              </Label>
+              <Input
+                id="gtmId"
+                name="gtmId"
+                placeholder="GTM-XXXXXXX"
+                value={formData.gtmId}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Container ID from GTM Dashboard (e.g. <code>GTM-NK5829P</code>).
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="ga4Id" className="text-xs font-semibold">
+                Google Analytics 4 (GA4) Measurement ID
+              </Label>
+              <Input
+                id="ga4Id"
+                name="ga4Id"
+                placeholder="G-XXXXXXXXXX"
+                value={formData.ga4Id}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Measurement ID from Google Analytics Admin Data Stream (e.g. <code>G-7X89B12345</code>).
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="googleVerification" className="text-xs font-semibold">
+                Google Search Console Verification Tag
+              </Label>
+              <Input
+                id="googleVerification"
+                name="googleVerification"
+                placeholder="google-site-verification=..."
+                value={formData.googleVerification}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Verification content code for Google Search Console indexation.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 justify-end items-center">
+            <Button
+              onClick={() => handleSaveSettings("Google Tag Manager & GA4")}
+              disabled={isSaving}
+              className="rounded-xl shadow-xs bg-[#CBB8DB] hover:bg-[#b59ece] text-slate-950 font-bold gap-1.5"
+            >
+              {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+              <span>Save Google Configuration</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 4c: Google OAuth 2.0 Credentials */}
+      <Dialog open={activeModal === "google_oauth"} onOpenChange={(open) => !open && setActiveModal(null)}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center">
+                <KeyRound className="size-5" />
+              </div>
+              <div>
+                <DialogTitle>Google OAuth 2.0 Credentials</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Configure Google Login Credentials for single-click Customer & Admin sign-in.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-2 text-xs leading-relaxed text-foreground">
+              <CheckCircle2 className="size-4 text-blue-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Live Social Login Setup</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Paste your Google Cloud OAuth Client ID and Secret below. Once saved, customers can immediately sign in using &quot;Continue with Google&quot;.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="GOOGLE_CLIENT_ID" className="text-xs font-semibold">
+                Google OAuth Client ID *
+              </Label>
+              <Input
+                id="GOOGLE_CLIENT_ID"
+                name="GOOGLE_CLIENT_ID"
+                placeholder="1234567890-xxx.apps.googleusercontent.com"
+                value={formData.GOOGLE_CLIENT_ID}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="GOOGLE_CLIENT_SECRET" className="text-xs font-semibold">
+                Google OAuth Client Secret *
+              </Label>
+              <Input
+                id="GOOGLE_CLIENT_SECRET"
+                name="GOOGLE_CLIENT_SECRET"
+                type="password"
+                placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxx"
+                value={formData.GOOGLE_CLIENT_SECRET}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            {/* AUTHORIZED REDIRECT URI DISPLAY */}
+            <div className="border-t border-border/60 pt-3.5 space-y-2">
+              <Label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                <span>🔗 Authorized Redirect URI (Google Cloud Console)</span>
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  readOnly
+                  value={googleAuthCallbackUrl}
+                  className="rounded-xl font-mono text-xs bg-muted/40 text-foreground border-border/80"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => copyToClipboard(googleAuthCallbackUrl, "Authorized Redirect URI copied!")}
+                  title="Copy Redirect URI"
+                  className="rounded-xl shrink-0 border-border/80 hover:bg-blue-500/10 hover:border-blue-500/40"
+                >
+                  {copiedField === googleAuthCallbackUrl ? (
+                    <Check className="size-4 text-emerald-500" />
+                  ) : (
+                    <Copy className="size-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                💡 <strong>Google Console Setup:</strong> In <a href="https://console.cloud.google.com/" target="_blank" rel="noreferrer" className="underline text-blue-500 font-bold">Google Cloud Console</a> &gt; APIs & Services &gt; Credentials &gt; OAuth 2.0 Client ID, add the URI above under <strong>Authorized redirect URIs</strong>.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 justify-end items-center">
+            <Button
+              onClick={() => handleSaveSettings("Google OAuth")}
+              disabled={isSaving}
+              className="rounded-xl shadow-xs bg-[#CBB8DB] hover:bg-[#b59ece] text-slate-950 font-bold gap-1.5"
+            >
+              {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+              <span>Save Google OAuth Credentials</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 4d: Firebase & FCM Push Notifications */}
+      <Dialog open={activeModal === "firebase"} onOpenChange={(open) => !open && setActiveModal(null)}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
+                <Flame className="size-5" />
+              </div>
+              <div>
+                <DialogTitle>Firebase & FCM Push Notifications</DialogTitle>
+                <DialogDescription className="text-xs">
+                  Configure Firebase Client Push Keys & Admin SDK Credentials.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2 text-xs leading-relaxed text-foreground">
+              <CheckCircle2 className="size-4 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold">Firebase Push & Admin Config</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  Save your Firebase credentials here to enable Web Push Notifications and Server-to-GSM push events directly from dashboard.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="FIREBASE_PROJECT_ID" className="text-xs font-semibold">
+                Firebase Project ID *
+              </Label>
+              <Input
+                id="FIREBASE_PROJECT_ID"
+                name="FIREBASE_PROJECT_ID"
+                placeholder="haq-plus"
+                value={formData.FIREBASE_PROJECT_ID}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="FIREBASE_CLIENT_EMAIL" className="text-xs font-semibold">
+                Firebase Admin Client Email *
+              </Label>
+              <Input
+                id="FIREBASE_CLIENT_EMAIL"
+                name="FIREBASE_CLIENT_EMAIL"
+                type="email"
+                placeholder="firebase-adminsdk-fbsvc@haq-plus.iam.gserviceaccount.com"
+                value={formData.FIREBASE_CLIENT_EMAIL}
+                onChange={handleChange}
+                className="rounded-xl font-mono text-xs"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="FIREBASE_PRIVATE_KEY" className="text-xs font-semibold">
+                Firebase Admin Private Key *
+              </Label>
+              <textarea
+                id="FIREBASE_PRIVATE_KEY"
+                name="FIREBASE_PRIVATE_KEY"
+                rows={3}
+                placeholder="-----BEGIN PRIVATE KEY-----\n..."
+                value={formData.FIREBASE_PRIVATE_KEY}
+                onChange={handleChange}
+                className="w-full rounded-xl border border-input bg-background p-2.5 font-mono text-xs text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 pt-1 border-t border-border/60">
+              <div className="space-y-1.5">
+                <Label htmlFor="NEXT_PUBLIC_FIREBASE_VAPID_KEY" className="text-xs font-semibold">
+                  Web Push VAPID Key
+                </Label>
+                <Input
+                  id="NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+                  name="NEXT_PUBLIC_FIREBASE_VAPID_KEY"
+                  placeholder="BBBlHlfNxsFbp..."
+                  value={formData.NEXT_PUBLIC_FIREBASE_VAPID_KEY}
+                  onChange={handleChange}
+                  className="rounded-xl font-mono text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="NEXT_PUBLIC_FIREBASE_API_KEY" className="text-xs font-semibold">
+                  Client API Key
+                </Label>
+                <Input
+                  id="NEXT_PUBLIC_FIREBASE_API_KEY"
+                  name="NEXT_PUBLIC_FIREBASE_API_KEY"
+                  placeholder="AIzaSyAbFVUF..."
+                  value={formData.NEXT_PUBLIC_FIREBASE_API_KEY}
+                  onChange={handleChange}
+                  className="rounded-xl font-mono text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0 justify-end items-center">
+            <Button
+              onClick={() => handleSaveSettings("Firebase Push & Admin SDK")}
+              disabled={isSaving}
+              className="rounded-xl shadow-xs bg-[#CBB8DB] hover:bg-[#b59ece] text-slate-950 font-bold gap-1.5"
+            >
+              {isSaving ? <RefreshCw className="size-4 animate-spin" /> : <Save className="size-4" />}
+              <span>Save Firebase Configuration</span>
             </Button>
           </DialogFooter>
         </DialogContent>

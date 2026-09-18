@@ -5,6 +5,7 @@ import { Search, X, Flame, Loader2, ArrowRight, ShoppingBag } from "lucide-react
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { trackEvent } from "@/lib/tracking";
 
 const POPULAR_SEARCHES = [
   "শ্রীমঙ্গল সিটিসি ব্ল্যাক টি",
@@ -77,8 +78,10 @@ export function SearchBar() {
 
   const handleSearch = (searchTerm: string) => {
     if (!searchTerm.trim()) return;
+    const cleanedSearch = searchTerm.trim();
+    trackEvent("Search", { search_string: cleanedSearch });
     setIsOpen(false);
-    router.push(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
+    router.push(`/shop?search=${encodeURIComponent(cleanedSearch)}`);
   };
 
   return (

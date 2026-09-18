@@ -56,7 +56,7 @@ if (fs.existsSync(envSrc)) {
   );
   envContent = envContent.replace(
     /NEXTAUTH_URL="http:\/\/localhost:3000"/g,
-    'NEXTAUTH_URL="https://test.jessoreseed.com"'
+    'NEXTAUTH_URL="https://test1.jessoreseed.com"'
   );
 
   if (!envContent.includes('DATABASE_URL="postgresql://modernve_haqplus_user')) {
@@ -100,4 +100,59 @@ for (const item of nextItems) {
 }
 console.log("✓ Copied .next build assets to .next/standalone/.next");
 
-console.log("\n🎉 cPanel Deployment Package Ready in .next/standalone!");
+// 6. Generate .htaccess inside .next/standalone
+const htaccessContent = `# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppType node
+PassengerStartupFile server.js
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+
+# Prevent raw directory index browsing
+Options -Indexes
+
+# Protect .env file from direct web access
+<Files ".env">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>`;
+
+fs.writeFileSync(path.join(standaloneDir, ".htaccess"), htaccessContent.trim(), "utf-8");
+console.log("✓ Created .htaccess in .next/standalone/.htaccess");
+
+// 7. Zip .next/standalone into cpanel_deploy.zip in project root
+let zipDest = path.join(rootDir, "cpanel_deploy.zip");
+
+if (fs.existsSync(zipDest)) {
+  try {
+    fs.unlinkSync(zipDest);
+  } catch (e) {
+    zipDest = path.join(rootDir, "cpanel_deploy_new.zip");
+    if (fs.existsSync(zipDest)) {
+      try { fs.unlinkSync(zipDest); } catch (e2) {}
+    }
+  }
+}
+
+try {
+  console.log(`📦 Zipping deployment package into ${path.basename(zipDest)}...`);
+  const { execSync } = require("child_process");
+  // Use bsdtar (built-in Windows tar) to create a standard ZIP compatible with Linux cPanel unzip
+  const zipCommand = `tar -a -cf "${zipDest}" -C "${standaloneDir}" .`;
+  execSync(zipCommand, { stdio: "inherit" });
+  console.log(`✅ ${path.basename(zipDest)} created successfully in project root!`);
+} catch (err) {
+  console.error("❌ Failed to create zip with tar, falling back to powershell:", err.message);
+  try {
+    const psCommand = `powershell -Command "Compress-Archive -Path '${standaloneDir}\\*' -DestinationPath '${zipDest}' -Force"`;
+    execSync(psCommand, { stdio: "inherit" });
+    console.log(`✅ ${path.basename(zipDest)} created via powershell!`);
+  } catch (psErr) {
+    console.error("❌ Failed to create zip via powershell:", psErr.message);
+  }
+}
+
+console.log("\n🎉 cPanel Deployment Package Ready!");

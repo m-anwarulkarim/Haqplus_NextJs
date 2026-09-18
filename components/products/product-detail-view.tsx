@@ -51,6 +51,16 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    trackEvent("ViewContent", {
+      content_name: product.name,
+      content_ids: [product.id],
+      content_category: product.category,
+      value: product.price,
+      currency: "BDT",
+    });
+  }, [product.id, product.name, product.category, product.price]);
+
   // Active price depends on selected variant or product discount
   const activePrice = selectedVariant ? selectedVariant.price : product.price;
   const originalPrice = product.originalPrice;

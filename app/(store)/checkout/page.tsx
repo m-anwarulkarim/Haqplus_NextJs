@@ -56,6 +56,24 @@ export default function CheckoutPage() {
   const shipping = hasHydrated ? getShippingCharge() : 0;
   const total = hasHydrated ? getTotal() : 0;
 
+  useEffect(() => {
+    if (hasHydrated && items.length > 0) {
+      trackEvent("InitiateCheckout", {
+        value: total,
+        currency: "BDT",
+        num_items: items.reduce((acc, it) => acc + it.quantity, 0),
+        content_ids: items.map((it) => it.productId),
+        items: items.map((it) => ({
+          item_id: it.productId,
+          item_name: it.name,
+          item_category: it.category,
+          price: it.price,
+          quantity: it.quantity,
+        })),
+      });
+    }
+  }, [hasHydrated]);
+
   const {
     register,
     handleSubmit,
@@ -137,12 +155,20 @@ export default function CheckoutPage() {
 
       const createdOrder = resData.order;
 
-      // Track purchase event with dual-pixel CAPI
+      // Track purchase event with dual-pixel CAPI & GA4
       trackEvent("Purchase", {
         order_id: createdOrder.orderNumber,
         value: createdOrder.total,
         currency: "BDT",
         num_items: items.reduce((acc, it) => acc + it.quantity, 0),
+        content_ids: items.map((it) => it.productId),
+        items: items.map((it) => ({
+          item_id: it.productId,
+          item_name: it.name,
+          item_category: it.category,
+          price: it.price,
+          quantity: it.quantity,
+        })),
       });
 
       // Clear the cart

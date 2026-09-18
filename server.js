@@ -1,14 +1,33 @@
 const { createServer } = require("http");
 const { parse } = require("url");
-const next = require("next");
 
 process.env.NODE_ENV = "production";
 const port = process.env.PORT || 3000;
 
-const app = next({ dev: false, dir: __dirname });
-const handle = app.getRequestHandler();
+let app;
+let handle;
 
-app.prepare().then(() => {
+try {
+  const next = require("next");
+  app = next({ dev: false, dir: __dirname });
+  handle = app.getRequestHandler();
+} catch (err) {
+  // Standalone mode fallback where next CLI dev entry point is pruned by Next.js
+  const NextServer = require("next/dist/server/next-server").default;
+  app = new NextServer({
+    hostname: "0.0.0.0",
+    port,
+    dir: __dirname,
+    dev: false,
+    customServer: false,
+    conf: {
+      distDir: ".next",
+    },
+  });
+  handle = app.getRequestHandler();
+}
+
+const startServer = () => {
   createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
@@ -22,7 +41,13 @@ app.prepare().then(() => {
     if (err) throw err;
     console.log(`> App ready on port ${port}`);
   });
-}).catch((err) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+};
+
+if (app && app.prepare && typeof app.prepare === "function") {
+  app.prepare().then(startServer).catch((err) => {
+    console.error("Failed to prepare app:", err);
+    process.exit(1);
+  });
+} else {
+  startServer();
+}
