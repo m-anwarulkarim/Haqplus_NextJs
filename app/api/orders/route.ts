@@ -299,8 +299,11 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Order creation unexpected error:", error);
-    return NextResponse.json({ error: "Failed to place order" }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || "Failed to place order" },
+      { status: 500 }
+    );
   }
 }
