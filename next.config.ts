@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@prisma/client", ".prisma/client", "pg", "pg-cloudflare"],
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   output: "standalone",
+  outputFileTracingIncludes: {
+    "/*": ["./node_modules/pg-cloudflare/**/*"],
+  },
+
 
   images: {
     remotePatterns: [
