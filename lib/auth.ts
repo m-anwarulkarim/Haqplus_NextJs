@@ -7,7 +7,113 @@ import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/validations/auth";
 import type { UserRole } from "@/types/next-auth";
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+
+const providers = [];
+
+if (googleClientId && googleClientSecret) {
+  providers.push(
+    Google({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
+    })
+  );
+}
+
+providers.push(
+  Credentials({
+    name: "credentials",
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+    },
+    async authorize(credentials) {
+      const validated = loginSchema.safeParse(credentials);
+      if (!validated.success) {
+        return null;
+      }
+
+      const { email, password } = validated.data;
+      const normalizedEmail = email.toLowerCase().trim();
+
+      // 1. Anwarul Karim Admin Master Account
+      if (
+        normalizedEmail === "dev.anwarul@gmail.com" &&
+        password === "dev.anwarul"
+      ) {
+        return {
+          id: "usr-anwarul-admin",
+          name: "Anwarul Karim",
+          email: "dev.anwarul@gmail.com",
+          image:
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+          role: "ADMIN" as UserRole,
+        };
+      }
+
+      // 2. Default Demo Admin
+      if (
+        normalizedEmail === "admin@apexstore.com" &&
+        password === "admin123456"
+      ) {
+        return {
+          id: "usr-apex-admin",
+          name: "Apex Administrator",
+          email: "admin@apexstore.com",
+          image:
+            "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+          role: "ADMIN" as UserRole,
+        };
+      }
+
+      // 3. Demo Customer Account
+      if (
+        normalizedEmail === "customer@apexstore.com" &&
+        password === "customer123"
+      ) {
+        return {
+          id: "usr-demo-customer",
+          name: "Tanzim Ahmed",
+          email: "customer@apexstore.com",
+          image:
+            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+          role: "CUSTOMER" as UserRole,
+        };
+      }
+
+      // 4. Query PostgreSQL Database
+      try {
+        const user = await prisma.user.findUnique({
+          where: { email: normalizedEmail },
+        });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const passwordsMatch = await bcrypt.compare(password, user.password);
+        if (!passwordsMatch) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role as UserRole,
+        };
+      } catch (dbErr) {
+        console.warn("Database connection issue during authentication:", dbErr);
+        return null;
+      }
+    },
+  })
+);
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "development-secret-key-32-characters-minimum-12345",
   trustHost: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
@@ -15,100 +121,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     signIn: "/login",
     error: "/login",
   },
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-    }),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const validated = loginSchema.safeParse(credentials);
-        if (!validated.success) {
-          return null;
-        }
+  providers,
 
-        const { email, password } = validated.data;
-        const normalizedEmail = email.toLowerCase().trim();
-
-        // 1. Anwarul Karim Admin Master Account
-        if (
-          normalizedEmail === "dev.anwarul@gmail.com" &&
-          password === "dev.anwarul"
-        ) {
-          return {
-            id: "usr-anwarul-admin",
-            name: "Anwarul Karim",
-            email: "dev.anwarul@gmail.com",
-            image:
-              "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
-            role: "ADMIN" as UserRole,
-          };
-        }
-
-        // 2. Default Demo Admin
-        if (
-          normalizedEmail === "admin@apexstore.com" &&
-          password === "admin123456"
-        ) {
-          return {
-            id: "usr-apex-admin",
-            name: "Apex Administrator",
-            email: "admin@apexstore.com",
-            image:
-              "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-            role: "ADMIN" as UserRole,
-          };
-        }
-
-        // 3. Demo Customer Account
-        if (
-          normalizedEmail === "customer@apexstore.com" &&
-          password === "customer123"
-        ) {
-          return {
-            id: "usr-demo-customer",
-            name: "Tanzim Ahmed",
-            email: "customer@apexstore.com",
-            image:
-              "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-            role: "CUSTOMER" as UserRole,
-          };
-        }
-
-        // 4. Query PostgreSQL Database
-        try {
-          const user = await prisma.user.findUnique({
-            where: { email: normalizedEmail },
-          });
-
-          if (!user || !user.password) {
-            return null;
-          }
-
-          const passwordsMatch = await bcrypt.compare(password, user.password);
-          if (!passwordsMatch) {
-            return null;
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            role: user.role as UserRole,
-          };
-        } catch (dbErr) {
-          console.warn("Database connection issue during authentication:", dbErr);
-          return null;
-        }
-      },
-    }),
-  ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
