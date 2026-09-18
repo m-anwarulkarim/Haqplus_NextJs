@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npx @opennextjs/cloudflare build",
-    "build:next": "next build",
+    "build": "next build",
+    "build:cloudflare": "npx @opennextjs/cloudflare build",
     "build:cpanel": "next build && node scripts/prepare-cpanel.js",
     "db:push": "prisma db push",
     "start": "next start",
