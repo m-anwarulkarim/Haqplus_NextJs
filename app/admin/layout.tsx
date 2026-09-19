@@ -8,13 +8,26 @@ import { AdminThemeToggle } from "@/components/admin/admin-theme-toggle";
 import { AdminNotifications } from "@/components/admin/admin-notifications";
 import { AdminUserNav } from "@/components/admin/admin-user-nav";
 
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Admin Portal — haqplus",
 };
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/admin/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    redirect("/unauthorized");
+  }
+
   return (
     <AdminSidebarProvider>
       <div className="h-screen overflow-hidden flex flex-col md:flex-row bg-muted/20 text-foreground relative">
