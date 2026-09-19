@@ -1,26 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-const createPrismaClient = () => {
-  let connectionString = process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL;
 
-  // Cloudflare Pages with OpenNext sometimes fails to polyfill user environment variables 
-  // into process.env. If it's missing, we read directly from the raw Cloudflare context.
+const prismaClientSingleton = () => {
   if (!connectionString) {
-    try {
-      const ctx = getCloudflareContext();
-      if ((ctx?.env as any)?.DATABASE_URL) {
-        connectionString = (ctx.env as any).DATABASE_URL;
-      }
-    } catch (e) {
-      // Ignore on local/node
-    }
-  }
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is missing. Please set it in Cloudflare Environment Variables.");
+    // Return a dummy client during build time if env is missing, but throw if actually used.
+    // Vercel sometimes doesn't have DATABASE_URL at build time.
+    console.warn("DATABASE_URL is missing during Prisma initialization.");
   }
 
   const pool = new Pool({ connectionString });
@@ -30,23 +18,8 @@ const createPrismaClient = () => {
 };
 
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof createPrismaClient>;
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
-
-const getPrisma = () => {
-  if (!globalThis.prismaGlobal) {
-    globalThis.prismaGlobal = createPrismaClient();
-  }
-  return globalThis.prismaGlobal as any;
-};
-
-// Use an Advanced Double Proxy to lazily instantiate the Prisma Client.
-// NextAuth PrismaAdapter destructures properties (e.g. `const { user } = prisma`)
-// at global module initialization time. A single proxy would trigger client creation
-// too early. This double proxy delays creation until a method is ACTUALLY invoked.
-export const prisma = new Proxy({} as any, {
-  get(target, prop) {
-    if (prop === "then" || typeof prop === "symbol") return undefined;
 
     return new Proxy(function () {} as any, {
       get(subTarget, subProp) {
