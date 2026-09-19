@@ -79,7 +79,11 @@ export async function POST(req: Request) {
       );
     }
     return NextResponse.json(
-      { error: error?.message || "Failed to create category" },
+      { 
+        error: error?.message || "Failed to create category",
+        envKeys: Object.keys(process.env).join(", "),
+        hasDbUrl: !!process.env.DATABASE_URL
+      },
       { status: 500 }
     );
   }
