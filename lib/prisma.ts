@@ -15,6 +15,10 @@ const createPrismaClient = () => {
   return new PrismaClient({ adapter });
 };
 
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof createPrismaClient>;
+} & typeof global;
+
 const getPrisma = () => {
   if (!globalThis.prismaGlobal) {
     globalThis.prismaGlobal = createPrismaClient();
