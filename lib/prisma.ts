@@ -2,12 +2,16 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
-const connectionString = process.env.DATABASE_URL;
-
-const pool = new Pool({ connectionString });
-const adapter = new PrismaPg(pool);
-
 const prismaClientSingleton = () => {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is missing. Please set it in Cloudflare Environment Variables.");
+  }
+
+  const pool = new Pool({ connectionString });
+  const adapter = new PrismaPg(pool);
+  
   return new PrismaClient({ adapter });
 };
 
