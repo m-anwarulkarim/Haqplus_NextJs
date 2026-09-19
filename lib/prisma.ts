@@ -21,24 +21,9 @@ declare const globalThis: {
   prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
 
-    return new Proxy(function () {} as any, {
-      get(subTarget, subProp) {
-        if (subProp === "then" || typeof subProp === "symbol") return undefined;
-        const realPrisma = getPrisma();
-        const model = realPrisma[prop];
-        if (model === undefined) return undefined;
-        if (typeof model[subProp] === "function") {
-          return model[subProp].bind(model);
-        }
-        return model[subProp];
-      },
-      apply(subTarget, thisArg, argArray) {
-        const realPrisma = getPrisma();
-        const func = realPrisma[prop];
-        return func.apply(realPrisma, argArray);
-      },
-    });
-  },
-});
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
+export default prisma;
 if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
+
+export { prisma };
