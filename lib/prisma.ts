@@ -9,7 +9,13 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient(): PrismaClient {
-  if (connectionString) {
+  const connectionString = process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    console.error("DATABASE_URL is not set in the environment variables!");
+    // In production, we MUST have a connection string for the Edge adapter.
+    // Throwing a clear error is better than Prisma's confusing edge runtime error.
+  } else {
     try {
       const pool = new Pool({ connectionString });
       const adapter = new PrismaPg(pool);
