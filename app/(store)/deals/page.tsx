@@ -24,7 +24,7 @@ export default async function DealsPage() {
     orderBy: { createdAt: "desc" },
   });
 
-  const dealProducts = dbDeals.map((p) => {
+  const dealProducts = dbDeals.map((p: any) => {
     const basePriceNum = Number(p.basePrice);
     const discountPriceNum = p.discountPrice ? Number(p.discountPrice) : null;
     const avgRating =
@@ -169,7 +169,7 @@ export default async function DealsPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
-          {dealProducts.map((product) => (
+          {dealProducts.map((product: any) => (
             <ProductCard key={product.id} product={product as any} />
           ))}
         </div>

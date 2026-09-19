@@ -28,7 +28,7 @@ export default async function StorefrontHomePage() {
       take: 5,
     });
 
-    categories = dbCategories.map((c) => ({
+    categories = dbCategories.map((c: any) => ({
       id: c.id,
       name: c.name,
       slug: c.slug,
@@ -46,7 +46,7 @@ export default async function StorefrontHomePage() {
       orderBy: [{ isFeatured: "desc" }, { createdAt: "desc" }],
     });
 
-    products = dbProducts.map((p) => {
+    products = dbProducts.map((p: any) => {
       const basePriceNum = Number(p.basePrice);
       const discountPriceNum = p.discountPrice ? Number(p.discountPrice) : null;
       const avgRating =

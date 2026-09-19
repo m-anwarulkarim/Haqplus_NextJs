@@ -33,7 +33,7 @@ export async function GET(req: Request) {
     });
 
     // Map to command palette format
-    const results = orders.map((order) => ({
+    const results = orders.map((order: any) => ({
       name: `Order #${order.orderNumber} - ${order.customerName} (${order.phone})`,
       href: `/admin/orders/${order.id}`,
       category: "Orders Search",
