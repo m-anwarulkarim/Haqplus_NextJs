@@ -3,7 +3,23 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 const createPrismaClient = () => {
-  const connectionString = process.env.DATABASE_URL;
+  let connectionString = process.env.DATABASE_URL;
+
+  // Cloudflare Pages with OpenNext sometimes fails to polyfill user environment variables 
+  // into process.env. If it's missing, we read directly from the raw Cloudflare context.
+  if (!connectionString) {
+    try {
+      const cloudflare = require("@opennextjs/cloudflare");
+      if (cloudflare && cloudflare.getCloudflareContext) {
+        const ctx = cloudflare.getCloudflareContext();
+        if (ctx?.env?.DATABASE_URL) {
+          connectionString = ctx.env.DATABASE_URL;
+        }
+      }
+    } catch (e) {
+      // Ignore on local/node
+    }
+  }
 
   if (!connectionString) {
     throw new Error("DATABASE_URL is missing. Please set it in Cloudflare Environment Variables.");
