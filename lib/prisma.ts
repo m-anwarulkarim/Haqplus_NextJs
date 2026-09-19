@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const createPrismaClient = () => {
   let connectionString = process.env.DATABASE_URL;
@@ -9,12 +10,9 @@ const createPrismaClient = () => {
   // into process.env. If it's missing, we read directly from the raw Cloudflare context.
   if (!connectionString) {
     try {
-      const cloudflare = require("@opennextjs/cloudflare");
-      if (cloudflare && cloudflare.getCloudflareContext) {
-        const ctx = cloudflare.getCloudflareContext();
-        if (ctx?.env?.DATABASE_URL) {
-          connectionString = ctx.env.DATABASE_URL;
-        }
+      const ctx = getCloudflareContext();
+      if (ctx?.env?.DATABASE_URL) {
+        connectionString = ctx.env.DATABASE_URL;
       }
     } catch (e) {
       // Ignore on local/node
