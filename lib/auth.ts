@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { loginSchema } from "@/lib/validations/auth";
 import type { UserRole } from "@/types/next-auth";
+import { authConfig } from "./auth.config";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
@@ -113,34 +114,7 @@ providers.push(
 );
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "development-secret-key-32-characters-minimum-12345",
-  trustHost: true,
+  ...authConfig,
   adapter: PrismaAdapter(prisma),
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
   providers,
-
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = (user as { role?: UserRole }).role ?? "CUSTOMER";
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        if (token.id) {
-          session.user.id = token.id as string;
-        }
-        if (token.role) {
-          session.user.role = token.role as UserRole;
-        }
-      }
-      return session;
-    },
-  },
 });
