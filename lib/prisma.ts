@@ -11,8 +11,8 @@ const createPrismaClient = () => {
   if (!connectionString) {
     try {
       const ctx = getCloudflareContext();
-      if (ctx?.env?.DATABASE_URL) {
-        connectionString = ctx.env.DATABASE_URL;
+      if ((ctx?.env as any)?.DATABASE_URL) {
+        connectionString = (ctx.env as any).DATABASE_URL;
       }
     } catch (e) {
       // Ignore on local/node
