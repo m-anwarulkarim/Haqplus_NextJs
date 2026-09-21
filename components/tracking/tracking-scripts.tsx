@@ -5,7 +5,8 @@ export async function TrackingScripts() {
   const pixelId =
     (await getResilientSetting("META_PIXEL_ID")) ||
     (await getResilientSetting("metaPixelId")) ||
-    process.env.NEXT_PUBLIC_META_PIXEL_ID;
+    process.env.NEXT_PUBLIC_META_PIXEL_ID ||
+    process.env.META_PIXEL_ID;
 
   const ga4Id =
     (await getResilientSetting("GA4_ID")) ||

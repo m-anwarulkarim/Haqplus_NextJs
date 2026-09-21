@@ -121,14 +121,14 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
 
   return (
     <div className="space-y-12">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14 items-start">
         {/* Left Column: Image Gallery */}
-        <div className="lg:col-span-6 sticky top-24">
+        <div className="sticky top-24">
           <ProductGallery images={product.images} productName={product.name} />
         </div>
 
         {/* Right Column: Product Info & Actions */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="space-y-6">
           {/* Category & Badge */}
           <div className="flex items-center justify-between">
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
@@ -353,14 +353,14 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground line-clamp-1">{product.name}</span>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-sm font-bold text-foreground truncate">{product.name}</span>
             <span className="text-sm font-bold text-emerald-600">৳{activePrice}</span>
           </div>
           <Button
             onClick={handleAddToCart}
             disabled={!isAvailable}
-            className="rounded-full bg-emerald-600 px-6 font-bold text-white shadow-lg shadow-emerald-600/30 hover:bg-emerald-700"
+            className="rounded-full bg-emerald-600 px-6 font-bold text-white shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 shrink-0"
           >
             <ShoppingBag className="mr-2 size-4" />
             Add to Cart
@@ -375,16 +375,16 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="relative size-12 overflow-hidden rounded-lg">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="relative size-12 overflow-hidden rounded-lg shrink-0">
               <img src={product.images[0] || "/placeholder.png"} alt={product.name} className="object-cover w-full h-full" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-base font-bold text-foreground line-clamp-1">{product.name}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-base font-bold text-foreground truncate">{product.name}</span>
               <span className="text-sm font-bold text-emerald-600">৳{activePrice}</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
              <Button
                 variant="outline"
                 className="rounded-full border-emerald-600/30 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"

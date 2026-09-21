@@ -200,23 +200,23 @@ export default async function ProductDetailPage({
       />
 
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
+      <nav className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground mb-8">
         <Link href="/" className="hover:text-emerald-600 transition-colors">
           হোম (Home)
         </Link>
-        <ChevronRight className="size-3.5" />
+        <ChevronRight className="size-3.5 shrink-0" />
         <Link href="/shop" className="hover:text-emerald-600 transition-colors">
           সকল চা (All Teas)
         </Link>
-        <ChevronRight className="size-3.5" />
+        <ChevronRight className="size-3.5 shrink-0" />
         <Link
           href={`/category/${formattedProduct.categorySlug || "tea"}`}
-          className="hover:text-emerald-600 transition-colors"
+          className="hover:text-emerald-600 transition-colors truncate max-w-[150px]"
         >
           {formattedProduct.category}
         </Link>
-        <ChevronRight className="size-3.5" />
-        <span className="font-semibold text-foreground truncate max-w-xs sm:max-w-md">
+        <ChevronRight className="size-3.5 shrink-0" />
+        <span className="font-semibold text-foreground truncate max-w-[150px] sm:max-w-xs">
           {formattedProduct.name}
         </span>
       </nav>
